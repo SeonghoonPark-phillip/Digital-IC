@@ -1,0 +1,6 @@
+// This context file was created by MyCAD Design Manager
+// 
+LIBRARY shpark .\shpark.lib
+LIBRARY Analog ..\..\..\Library\MyAnalog\Analog.lib
+LIBRARY inverter .\inverter.lib
+LIBRARY NAND .\NAND.lib

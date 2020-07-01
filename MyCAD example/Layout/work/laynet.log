@@ -1,0 +1,1600 @@
+
+**************************************************************
+                      PARSING THE RULE FILE
+**************************************************************
+;###################################################################################
+;# MYCAD, INC. SHALL NOT BE LIABLE FOR THE ACCURACY OF                             #
+;# THIS DESIGN RULE FILE OR IT'S ABILITY TO CAPTURE ERRORS.                        #
+;# THE USER IS RESPONSIBLE FOR THOROUGHLY TESTING AND IMPLEMENTING                 #
+;# IT'S FEATURES.                                                                  #
+;###################################################################################
+;
+;##########################################################################################
+;# MOSIS SCMOS 0.35UM EXTRACTION, ERC AND LVS RULE FOR MYCHIP (REF. HTTP://WWW.MOSIS.COM) #
+;# TSMC (0.35UM N-WELL) SCN4ME_SUBM (LAMBDA=0.2 UM)			                  #
+;# BY MYCAD SUPPORT GROUP							          #
+;#										          #
+;# SUPPORT INFORMATION:                                                                   #
+;#                                                                                        #
+;# THIS RULE FILE IS SUPPORTED BY MYCAD, INC. CUSTOMER SUPPORT.                           #
+;# FOR CONTACT INFORMATION CONSULT SUPPORT@SELOCO.COM                                     #
+;#                                                                                        #
+;# REVISION HISTORY:                                                                      #
+;#                                                                                        #
+;# 08/17/2004      BUILD                                                                  #
+;#                                                                                        #
+;# 08/20/2004      FIRST RELEASE                                                          #
+;##########################################################################################
+;
+;###################################################################################
+;# DESCRIPTION BLOCK								   #
+;###################################################################################
+;
+;TECHNOLOGY LAYERS: NWELL ACTIVE THK_ACTIVE PPLUS NPLUS POLY POLY2 CONTACT 
+;                   METAL1 VIA METAL2 VIA2 METAL3 VIA3 METAL4
+;                   GLASS
+;                   PROBE (NON-FAB LAYER USED TO HIGHLIGHT PADS)
+;
+*DESCRIPTION
+;
+MODEL = MOS[P],PMOS  MOS[N],NMOS
+MODEL = DIO[P],PDIO  DIO[N],NDIO
+MODEL = CAP[P],C
+MODEL = RES[P],R
+;
+CHECK-MODE = FLAT
+;
+*LAYER
+;
+SUBSTRATE = PBULK
+;
+CONNECT-LAYER = PSUB NWELL PSD NSD IPOLY POLY2 METAL1 METAL2 METAL3 METAL4
+;
+ATTACH	ME1TXT	TO	METAL1
+ATTACH	ME2TXT	TO	METAL2
+ATTACH	ME3TXT	TO	METAL3
+ATTACH	ME4TXT	TO	METAL4
+;
+;
+;##################################################################################
+;# OPERATION BLOCK								  #
+;##################################################################################
+;
+*OPERATION
+;
+; P-SUBSTRATE
+NOT	PBULK	NWELL		PSUB
+; GATE AND SOURCE/DRAIN FOR MOS
+AND	ACTIVE	PPLUS		PACTIVE
+AND	ACTIVE	NPLUS		NACTIVE
+OR 	PPLUS	NPLUS		ALLSELECT
+AND	PACTIVE	POLY		PGATE
+AND	NACTIVE	POLY		NGATE
+NOT	NACTIVE	POLY		NSD
+NOT	PACTIVE	POLY		PSD
+; WELL AND SUBSTRATE CONTACT
+AND	PSUB	PSD		PPLUG
+AND	NWELL	NSD		NPLUG
+AND	PPLUG	CONTACT		PPCONT
+AND	NPLUG	CONTACT		NPCONT
+; POLY RESISTOR
+AND	POLY	RES_MASK	POLRES
+NOT	POLY	POLRES		IPOLY
+; CAPACITOR OF POLY AND POLY2 
+AND	POLY	POLY2		POLYCAP
+; PARASITIC CAPACITOR BETWEEN POLY AND METAL1
+AND	METAL1	IPOLY		ME1POLY
+; PARASITIC CAPACITOR BETWEEN POLY AND METAL2
+AND	METAL2	IPOLY		ME2POLY
+; PARASITIC CAPACITOR BETWEEN METAL1 AND METAL2
+AND	METAL1	METAL2		ME1ME2
+; PARASITIC DIODE
+AND	PSD	NWELL		PDIO
+AND	NSD	PSUB		NDIO
+; INTERLAYER CONNECTION
+CONNECT		METAL4	METAL3	BY	VIA3
+CONNECT		METAL3	METAL2	BY	VIA2
+CONNECT		METAL2	METAL1	BY	VIA
+CONNECT		METAL1	POLY2	BY	CONTACT
+CONNECT		METAL1	IPOLY	BY	CONTACT
+CONNECT		METAL1	PSD	BY	CONTACT
+CONNECT		METAL1	NSD	BY	CONTACT
+; WELL AND SUBSTRATE CONNECTION
+SCONNECT	PSD	PSUB	BY	PPCONT
+SCONNECT	NSD	NWELL	BY	NPCONT
+;
+; POLYSILICON RESISTOR
+ELEMENT		RES[P]	POLRES	IPOLY
+PARAMETER	RES[P]  400.0
+; MOS
+ELEMENT		MOS[P]	PGATE	IPOLY	PSD		NWELL
+ELEMENT		MOS[N]	NGATE	IPOLY	NSD		PSUB
+; PARASITIC DIODE
+;ELEMENT		DIO[P]	PDIO	PSD	NWELL
+;ELEMENT		DIO[N]	NDIO	NSD	PSUB
+; POLYSILICON CAPACITOR
+ELEMENT		CAP[P]	POLYCAP	IPOLY	POLY2
+PARAMETER	CAP[P]  8.30E-4	0.0
+; PARASITIC CAPACITOR BETWEEN POLY AND METAL1
+PARASITIC	CAP[A]	ME1POLY	METAL1	IPOLY
+ATTRIBUTE	CAP[A]  4.40E-5	5.70E-5
+; PARASITIC CAPACITOR BETWEEN POLY AND METAL2
+PARASITIC	CAP[B]	ME2POLY	METAL2	IPOLY
+ATTRIBUTE	CAP[B]	1.50E-5	3.80E-5
+; PARASITIC CAPACITOR BETWEEN METAL1 AND METAL2
+PARASITIC	CAP[C]	ME1ME2	METAL1	METAL2
+ATTRIBUTE	CAP[C]	3.40E-5	5.40E-5
+;
+; ERC
+MULTILAB				"SHORT CIRCUIT"
+SAMELAB					"OPEN CIRCUIT"
+;PATHCHK		LEVEL 1			"NO PATH TO POWER"
+LCONNECT	PSUB CONN VDD		"PSUB CONNECTED TO POWER"
+LCONNECT	PSUB DISC GND		"PSUB NOT CONNECTED TO GROUND"
+;ELCOUNT		MOS ALL EQ 1		"SINGULAR NODE"
+NDCOUNT		MOS ALL EQ 1		"ALL TERMINAL TIED TOGETHER"
+ECONNECT	MOS[N] IPOLY CONN VDD	"N-MOS GATE CONNECTED TO POWER"
+ECONNECT	MOS[P] IPOLY CONN GND	"P-MOS GATE CONNECTED TO GROUND"
+ECONNECT	MOS[P] PSD   CONN GND	"P-MOS SOURCE/DRAIN CONNECTED TO GROUND"
+;
+; LVSCHK
+LVSCHK[CS]WPERCENT=5 LPERCENT=5 CAPAREA=5 CAPVAL=5 DIOAREA=10 DIOPERI=10 RESVAL=10
+*END
+
+**************************************************************
+                      COMMAND SEQUENCE
+**************************************************************
+>> GENERATE TEXT FILE
+   NWELL               NWELL               
+   ACTIVE              ACTIVE              
+   THK_ACTIVE          THK_ACTIVE          
+   POLY                POLY                
+   NPLUS               NPLUS               
+   PPLUS               PPLUS               
+   POLY2               POLY2               
+   CONTACT             CONTACT             
+   VIA                 VIA                 
+   METAL1              METAL1              
+   METAL2              METAL2              
+   VIA2                VIA2                
+   METAL3              METAL3              
+   VIA3                VIA3                
+   METAL4              METAL4              
+   GLASS               GLASS               
+   PROBE               PROBE               
+   RES_MASK            RES_MASK            
+   POLYTXT             POLYTXT             
+   ME1TXT              ME1TXT              
+   ME2TXT              ME2TXT              
+   ME3TXT              ME3TXT              
+   ME4TXT              ME4TXT              
+>> LOGICAL OPERATION
+   NOT       PBULK               NWELL               PSUB                
+   AND       ACTIVE              PPLUS               PACTIVE             
+   AND       ACTIVE              NPLUS               NACTIVE             
+   OR        PPLUS               NPLUS               ALLSELECT           
+   AND       PACTIVE             POLY                PGATE               
+   AND       NACTIVE             POLY                NGATE               
+   NOT       NACTIVE             POLY                NSD                 
+   NOT       PACTIVE             POLY                PSD                 
+   AND       PSUB                PSD                 PPLUG               
+   AND       NWELL               NSD                 NPLUG               
+   AND       PPLUG               CONTACT             PPCONT              
+   AND       NPLUG               CONTACT             NPCONT              
+   AND       POLY                RES_MASK            POLRES              
+   NOT       POLY                POLRES              IPOLY               
+   AND       POLY                POLY2               POLYCAP             
+   AND       METAL1              IPOLY               ME1POLY             
+   AND       METAL2              IPOLY               ME2POLY             
+   AND       METAL1              METAL2              ME1ME2              
+   AND       PSD                 NWELL               PDIO                
+   AND       NSD                 PSUB                NDIO                
+>> IDENTIFY THE REGION ID
+   METAL4              METAL4              
+   METAL3              METAL3              
+   METAL2              METAL2              
+   METAL1              METAL1              
+   POLY2               POLY2               
+   IPOLY               IPOLY               
+   NSD                 NSD                 
+   PSD                 PSD                 
+   NWELL               NWELL               
+   PSUB                PSUB                
+>> LOGICAL OPERATION
+   AND       NSD                 NPCONT              0NPCONT             0                   0                   
+   AND       PSD                 PPCONT              0PPCONT             0                   0                   
+   AND       METAL1              CONTACT             0CONTACT            0                   0                   
+   AND       METAL2              VIA                 0VIA                0                   0                   
+   AND       METAL3              VIA2                0VIA2               0                   0                   
+   AND       METAL4              VIA3                0VIA3               0                   0                   
+   NOT       0CONTACT            POLY2               1CONTACT            0                   0                   
+   NOT       1CONTACT            IPOLY               2CONTACT            0                   0                   
+   NOT       2CONTACT            NSD                 3CONTACT            0                   0                   
+>> PRE_ATTACH
+   METAL4              ME4TXT              0ME4TXT             0                   
+   0ME4TXT             ME4TXT              
+   METAL3              ME3TXT              0ME3TXT             0                   
+   0ME3TXT             ME3TXT              
+   METAL2              ME2TXT              0ME2TXT             0                   
+   0ME2TXT             ME2TXT              
+   METAL1              ME1TXT              0ME1TXT             0                   
+   0ME1TXT             ME1TXT              
+   METAL4              EDTXALL             0EDTXALL            1                   
+   METAL3              0EDTXALL            1EDTXALL            0                   
+   METAL2              1EDTXALL            2EDTXALL            0                   
+   METAL1              2EDTXALL            3EDTXALL            0                   
+   POLY2               3EDTXALL            4EDTXALL            0                   
+   IPOLY               4EDTXALL            5EDTXALL            0                   
+   NSD                 5EDTXALL            6EDTXALL            0                   
+   PSD                 6EDTXALL            7EDTXALL            0                   
+   NWELL               7EDTXALL            8EDTXALL            0                   
+   PSUB                8EDTXALL            9EDTXALL            0                   
+   9EDTXALL            EDTXALL             
+   METAL4              METAL4              0METAL4             1                   
+   0METAL4             METAL4              
+   METAL3              METAL3              0METAL3             1                   
+   0METAL3             METAL3              
+   METAL2              METAL2              0METAL2             1                   
+   0METAL2             METAL2              
+   METAL1              METAL1              0METAL1             1                   
+   0METAL1             METAL1              
+   POLY2               POLY2               0POLY2              1                   
+   0POLY2              POLY2               
+   IPOLY               IPOLY               0IPOLY              1                   
+   0IPOLY              IPOLY               
+   NSD                 NSD                 0NSD                1                   
+   0NSD                NSD                 
+   PSD                 PSD                 0PSD                1                   
+   0PSD                PSD                 
+   NWELL               NWELL               0NWELL              1                   
+   0NWELL              NWELL               
+   PSUB                PSUB                0PSUB               1                   
+   0PSUB               PSUB                
+>> NODAL INFORMATION
+   CONNECT             0CONTACT            POLY2               
+   CONNECT             1CONTACT            IPOLY               
+   CONNECT             2CONTACT            NSD                 
+   CONNECT             3CONTACT            PSD                 
+   CONNECT             0VIA                METAL1              
+   CONNECT             0VIA2               METAL2              
+   CONNECT             0VIA3               METAL3              
+   NODE CONVERSION     METAL4              METAL4              
+   NODE CONVERSION     METAL3              METAL3              
+   NODE CONVERSION     METAL2              METAL2              
+   NODE CONVERSION     METAL1              METAL1              
+   NODE CONVERSION     POLY2               POLY2               
+   NODE CONVERSION     IPOLY               IPOLY               
+   NODE CONVERSION     NSD                 NSD                 
+   NODE CONVERSION     PSD                 PSD                 
+   NODE CONVERSION     NWELL               NWELL               
+   NODE CONVERSION     PSUB                PSUB                
+   NODE CONVERSION     0NPCONT             0NPCONT             
+   NODE CONVERSION     0PPCONT             0PPCONT             
+   NODE CONVERSION     0CONTACT            0CONTACT            
+   NODE CONVERSION     1CONTACT            1CONTACT            
+   NODE CONVERSION     2CONTACT            2CONTACT            
+   NODE CONVERSION     3CONTACT            3CONTACT            
+   NODE CONVERSION     0VIA                0VIA                
+   NODE CONVERSION     0VIA2               0VIA2               
+   NODE CONVERSION     0VIA3               0VIA3               
+   INSTANCE PIN NODE CONVERSION9PIN                
+>> POST_ATTACH
+   6PAD                9PAD                
+>> UNKNOWN
+   9PAD                9PAD                
+>> SCONNECT
+   SCONNECT  NWELL               0NPCONT             9PAD                
+   SCONNECT  PSUB                0PPCONT             9PAD                
+>> IDENTIFY THE REGION ID
+   POLRES              RESXP               
+   PGATE               MOSXP               
+   NGATE               MOSXN               
+   POLYCAP             CAPXP               
+   ME1POLY             CAPXA               
+   ME2POLY             CAPXB               
+   ME1ME2              CAPXC               
+>> CREATE THE NET
+   RESXP               IPOLY               RESIPOLYXP          
+   MOSXP               IPOLY               MOSIPOLYXP          
+   MOSXP               PSD                 MOSPSDXP            
+   MOSXP               NWELL               MOSNWELLXP          
+   MOSXN               IPOLY               MOSIPOLYXN          
+   MOSXN               NSD                 MOSNSDXN            
+   MOSXN               PSUB                MOSPSUBXN           
+   CAPXP               IPOLY               CAPIPOLYXP          
+   CAPXP               POLY2               CAPPOLY2XP          
+   CAPXA               METAL1              CAPMETAL1XA         
+   CAPXA               IPOLY               CAPIPOLYXA          
+   CAPXB               METAL2              CAPMETAL2XB         
+   CAPXB               IPOLY               CAPIPOLYXB          
+   CAPXC               METAL1              CAPMETAL1XC         
+   CAPXC               METAL2              CAPMETAL2XC         
+>> MERGE THE DEVICE REGION ID
+   COPY THE DEVICE REGION ID               MOSXP               MOSX8               
+   MERGE THE DEVICE REGION ID              MOSXN               MOSX8               MOSX8               
+   COPY THE DEVICE REGION ID               CAPXP               CAPX8               
+   COPY THE DEVICE REGION ID               RESXP               RESX8               
+>> CALCULATE THE PARAMETER
+   CALCULATE THE WIDTH                     RESXP               IPOLY               RESIPOLYXP          RESXP               
+   CALCULATE THE AREA                      RESXP               RESXP               
+   CALCULATE THE WIDTH                     MOSXP               PSD                 MOSPSDXP            MOSXP               
+   CALCULATE THE AREA                      MOSXP               MOSXP               
+   CALCULATE THE AREA                      PSD                 PSD                 
+   CALCULATE THE PERI                      PSD                 PSD                 
+   CALCULATE THE WIDTH                     MOSXN               NSD                 MOSNSDXN            MOSXN               
+   CALCULATE THE AREA                      MOSXN               MOSXN               
+   CALCULATE THE AREA                      NSD                 NSD                 
+   CALCULATE THE PERI                      NSD                 NSD                 
+   CALCULATE THE PERI                      CAPXP               CAPXP               
+   CALCULATE THE AREA                      CAPXP               CAPXP               
+   CALCULATE THE PERI                      CAPXA               CAPXA               
+   CALCULATE THE AREA                      CAPXA               CAPXA               
+   CALCULATE THE PERI                      CAPXB               CAPXB               
+   CALCULATE THE AREA                      CAPXB               CAPXB               
+   CALCULATE THE PERI                      CAPXC               CAPXC               
+   CALCULATE THE AREA                      CAPXC               CAPXC               
+>> GENERATE THE DEVICE NETWORK
+   GENERATE THE RESISTOR NETWORK           RESIPOLYXP          RESXP               400                 
+   GENERATE THE MOS NETWORK                MOSIPOLYXP          MOSPSDXP            MOSNWELLXP          MOSXP               PSD                 
+   GENERATE THE MOS NETWORK                MOSIPOLYXN          MOSNSDXN            MOSPSUBXN           MOSXN               NSD                 
+   GENERATE THE CAPACITOR NETWORK          CAPIPOLYXP          CAPPOLY2XP          CAPXP               0.00083             0                   
+   GENERATE THE CAPACITOR NETWORK          CAPMETAL1XA         CAPIPOLYXA          CAPXA               4.4e-005            5.7e-005            
+   GENERATE THE CAPACITOR NETWORK          CAPMETAL2XB         CAPIPOLYXB          CAPXB               1.5e-005            3.8e-005            
+   GENERATE THE CAPACITOR NETWORK          CAPMETAL1XC         CAPMETAL2XC         CAPXC               3.4e-005            5.4e-005            
+>> MERGE THE NET
+   MERGE THE NETS      MOSIPOLYXP          MOSPSDXP            MOSALLXP            
+   MERGE THE NETS      MOSALLXP            MOSNWELLXP          MOSALLXP            
+   MERGE THE NETS      MOSIPOLYXN          MOSNSDXN            MOSALLXN            
+   MERGE THE NETS      MOSALLXN            MOSPSUBXN           MOSALLXN            
+   MERGE THE NETS      CAPIPOLYXP          CAPPOLY2XP          CAPALLXP            
+   MERGE THE NETS      CAPMETAL1XA         CAPIPOLYXA          CAPALLXA            
+   MERGE THE NETS      CAPMETAL2XB         CAPIPOLYXB          CAPALLXB            
+   MERGE THE NETS      CAPMETAL1XC         CAPMETAL2XC         CAPALLXC            
+   COPY THE NET        RESIPOLYXP          RESIPOLYX8          
+   MERGE THE NETS      MOSIPOLYXP          MOSIPOLYXN          MOSIPOLYX8          
+   COPY THE NET        MOSPSDXP            MOSPSDX8            
+   COPY THE NET        MOSNWELLXP          MOSNWELLX8          
+   MERGE THE NETS      MOSIPOLYXP          MOSIPOLYXN          MOSIPOLYX8          
+   COPY THE NET        MOSNSDXN            MOSNSDX8            
+   COPY THE NET        MOSPSUBXN           MOSPSUBX8           
+   MERGE THE NETS      CAPIPOLYXP          CAPIPOLYXA          CAPIPOLYX8          
+   MERGE THE NETS      CAPIPOLYX8          CAPIPOLYXB          CAPIPOLYX8          
+   COPY THE NET        CAPPOLY2XP          CAPPOLY2X8          
+   MERGE THE NETS      CAPMETAL1XA         CAPMETAL1XC         CAPMETAL1X8         
+   MERGE THE NETS      CAPIPOLYXP          CAPIPOLYXA          CAPIPOLYX8          
+   MERGE THE NETS      CAPIPOLYX8          CAPIPOLYXB          CAPIPOLYX8          
+   MERGE THE NETS      CAPMETAL2XB         CAPMETAL2XC         CAPMETAL2X8         
+   MERGE THE NETS      CAPIPOLYXP          CAPIPOLYXA          CAPIPOLYX8          
+   MERGE THE NETS      CAPIPOLYX8          CAPIPOLYXB          CAPIPOLYX8          
+   MERGE THE NETS      CAPMETAL1XA         CAPMETAL1XC         CAPMETAL1X8         
+   MERGE THE NETS      CAPMETAL2XB         CAPMETAL2XC         CAPMETAL2X8         
+   MERGE THE NETS      MOSALLXP            MOSALLXN            MOSALLX8            
+   MERGE THE NETS      MOSALLXP            MOSALLXN            MOSALLX8            
+   MERGE THE NETS      CAPALLXP            CAPALLXA            CAPALLX8            
+   MERGE THE NETS      CAPALLX8            CAPALLXB            CAPALLX8            
+   MERGE THE NETS      CAPALLX8            CAPALLXC            CAPALLX8            
+   MERGE THE NETS      CAPALLXP            CAPALLXA            CAPALLX8            
+   MERGE THE NETS      CAPALLX8            CAPALLXB            CAPALLX8            
+   MERGE THE NETS      CAPALLX8            CAPALLXC            CAPALLX8            
+   MERGE THE NETS      CAPALLXP            CAPALLXA            CAPALLX8            
+   MERGE THE NETS      CAPALLX8            CAPALLXB            CAPALLX8            
+   MERGE THE NETS      CAPALLX8            CAPALLXC            CAPALLX8            
+   MERGE THE NETS      CAPALLXP            CAPALLXA            CAPALLX8            
+   MERGE THE NETS      CAPALLX8            CAPALLXB            CAPALLX8            
+   MERGE THE NETS      CAPALLX8            CAPALLXC            CAPALLX8            
+>> COMMAND SET FOR ERC
+   READ THE EDGE FILE  METAL4              14                  
+   READ THE EDGE FILE  METAL3              12                  
+   READ THE EDGE FILE  METAL2              10                  
+   READ THE EDGE FILE  METAL1              9                   
+   READ THE EDGE FILE  POLY2               6                   
+   READ THE EDGE FILE  IPOLY               37                  
+   READ THE EDGE FILE  NSD                 30                  
+   READ THE EDGE FILE  PSD                 31                  
+   READ THE EDGE FILE  NWELL               0                   
+   READ THE EDGE FILE  PSUB                24                  
+   READ THE EDGE FILE  0NPCONT             -1                  
+   READ THE EDGE FILE  0PPCONT             -1                  
+   READ THE EDGE FILE  0CONTACT            -1                  
+   READ THE EDGE FILE  1CONTACT            -1                  
+   READ THE EDGE FILE  2CONTACT            -1                  
+   READ THE EDGE FILE  3CONTACT            -1                  
+   READ THE EDGE FILE  0VIA                -1                  
+   READ THE EDGE FILE  0VIA2               -1                  
+   READ THE EDGE FILE  0VIA3               -1                  
+   SHORT               9PAD                
+   OUTPUT              6TEMP               -1                  -1                  
+>> SHTEST
+   CONNECT FOR SHORT CHECKING              NSD                 0NPCONT             
+   CONNECT FOR SHORT CHECKING              0NPCONT             NWELL               
+   CONNECT FOR SHORT CHECKING              PSD                 0PPCONT             
+   CONNECT FOR SHORT CHECKING              0PPCONT             PSUB                
+   CONNECT FOR SHORT CHECKING              METAL1              0CONTACT            
+   CONNECT FOR SHORT CHECKING              METAL1              1CONTACT            
+   CONNECT FOR SHORT CHECKING              METAL1              2CONTACT            
+   CONNECT FOR SHORT CHECKING              METAL1              3CONTACT            
+   CONNECT FOR SHORT CHECKING              0CONTACT            POLY2               
+   CONNECT FOR SHORT CHECKING              1CONTACT            IPOLY               
+   CONNECT FOR SHORT CHECKING              2CONTACT            NSD                 
+   CONNECT FOR SHORT CHECKING              3CONTACT            PSD                 
+   CONNECT FOR SHORT CHECKING              METAL2              0VIA                
+   CONNECT FOR SHORT CHECKING              0VIA                METAL1              
+   CONNECT FOR SHORT CHECKING              METAL3              0VIA2               
+   CONNECT FOR SHORT CHECKING              0VIA2               METAL2              
+   CONNECT FOR SHORT CHECKING              METAL4              0VIA3               
+   CONNECT FOR SHORT CHECKING              0VIA3               METAL3              
+   TOUCH FOR SHORT CHECKING                METAL4              
+   TOUCH FOR SHORT CHECKING                METAL3              
+   TOUCH FOR SHORT CHECKING                METAL2              
+   TOUCH FOR SHORT CHECKING                METAL1              
+   TOUCH FOR SHORT CHECKING                POLY2               
+   TOUCH FOR SHORT CHECKING                IPOLY               
+   TOUCH FOR SHORT CHECKING                NSD                 
+   TOUCH FOR SHORT CHECKING                PSD                 
+   TOUCH FOR SHORT CHECKING                NWELL               
+   TOUCH FOR SHORT CHECKING                PSUB                
+   ATTACH FOR SHORT CHECKING               METAL4              ME4TXT              0ME4TXT             
+   ATTACH FOR SHORT CHECKING               METAL3              ME3TXT              0ME3TXT             
+   ATTACH FOR SHORT CHECKING               METAL2              ME2TXT              0ME2TXT             
+   ATTACH FOR SHORT CHECKING               METAL1              ME1TXT              0ME1TXT             
+   OUTPUT FOR SHORT CHECKING               6TEMP               
+>> COMMAND SET FOR ERC
+   READ THE EDGE FILE  MOSX8               0                   
+   ECONNECT            MOSIPOLYXN          1                   VDD                 9PAD                
+   OUTPUT              6TEMP               -1                  -1                  
+>> COMMAND SET FOR ERC
+   READ THE EDGE FILE  MOSX8               0                   
+   ECONNECT            MOSIPOLYXP          1                   GND                 9PAD                
+   OUTPUT              6TEMP               -1                  -1                  
+>> COMMAND SET FOR ERC
+   READ THE EDGE FILE  MOSX8               0                   
+   ECONNECT            MOSPSDXP            1                   GND                 9PAD                
+   OUTPUT              6TEMP               -1                  -1                  
+>> COMMAND SET FOR ERC
+   READ THE EDGE FILE  MOSX8               0                   
+   NDCOUNT             MOSALLX8            5                   1                   9PAD                
+   OUTPUT              6TEMP               -1                  -1                  
+>> COMMAND SET FOR ERC
+   READ THE EDGE FILE  PSUB                24                  
+   LCONNECT            1                   VDD                 9PAD                
+   OUTPUT              6TEMP               -1                  -1                  
+>> COMMAND SET FOR ERC
+   READ THE EDGE FILE  PSUB                24                  
+   LCONNECT            2                   GND                 9PAD                
+   OUTPUT              6TEMP               -1                  -1                  
+>> COMMAND SET FOR ERC
+   READ THE EDGE FILE  METAL4              14                  
+   READ THE EDGE FILE  METAL3              12                  
+   READ THE EDGE FILE  METAL2              10                  
+   READ THE EDGE FILE  METAL1              9                   
+   READ THE EDGE FILE  POLY2               6                   
+   READ THE EDGE FILE  IPOLY               37                  
+   READ THE EDGE FILE  NSD                 30                  
+   READ THE EDGE FILE  PSD                 31                  
+   READ THE EDGE FILE  NWELL               0                   
+   READ THE EDGE FILE  PSUB                24                  
+   OPEN                9PAD                
+   OUTPUT              6TEMP               -1                  -1                  
+>> MERGE THE CAPACITOR
+   CAPXA               CAPXA               9PAD                
+   CAPXB               CAPXB               9PAD                
+   CAPXC               CAPXC               9PAD                
+>> DISPLAY
+   DISPLAY THE SUBCKT                      6PIN                9PAD                
+   DISPLAY THE RESISTOR NET                RESXP               R                   EXTRACT             9PAD                
+   DISPLAY THE MOS NET                     MOSXP               PMOS                EXTRACT             9PAD                
+   DISPLAY THE MOS NET                     MOSXN               NMOS                EXTRACT             9PAD                
+   DISPLAY THE CAPACITOR NET               CAPXP               C                   EXTRACT             9PAD                
+   DISPLAY THE CAPACITOR NET               CAPXA               C                   EXTRACT             9PAD                
+   DISPLAY THE CAPACITOR NET               CAPXB               C                   EXTRACT             9PAD                
+   DISPLAY THE CAPACITOR NET               CAPXC               C                   EXTRACT             9PAD                
+   DISPLAY THE SUBCIRCUIT CALL             9INST               9PIN                9PAD                
+   DISPLAY THE END SUBCKT                  
+>> GENERATE THE SHAPE FILE FOR NET
+>> CONNECT LAYER SEQUENCE
+   METAL4              
+   METAL3              
+   METAL2              
+   METAL1              
+   POLY2               
+   IPOLY               
+   NSD                 
+   PSD                 
+   NWELL               
+   PSUB                
+>> MASTER LAYER ABOUT EACH CONTACT LAYER
+   *CONTACT              MASTER               CONNECT             
+    NPCONT               NSD                  NWELL               
+    PPCONT               PSD                  PSUB                
+    CONTACT              METAL1               POLY2               
+    CONTACT              METAL1               IPOLY               
+    CONTACT              METAL1               NSD                 
+    CONTACT              METAL1               PSD                 
+    VIA                  METAL2               METAL1              
+    VIA2                 METAL3               METAL2              
+    VIA3                 METAL4               METAL3              
+>> ELEMENT    DEVICE               TERM1                TERM2                TERM3                TERM4               
+   RES[P]     POLRES               IPOLY                n¢…                  µ                                     
+   MOS[P]     PGATE                IPOLY                PSD                  NWELL                                    
+   MOS[N]     NGATE                IPOLY                NSD                  PSUB                                     
+   CAP[P]     POLYCAP              IPOLY                POLY2                #                                     
+   CAP[A]     ME1POLY              METAL1               IPOLY                µ                                     
+   CAP[B]     ME2POLY              METAL2               IPOLY                #                                     
+   CAP[C]     ME1ME2               METAL1               METAL2               µ                                     
+>> ERC COMMANDS : 
+>> ERC COMMANDS : MOS[N]
+>> ERC COMMANDS : MOS[P]
+>> ERC COMMANDS : MOS[P]
+>> ERC COMMANDS : MOS
+>> ERC COMMANDS : 
+>> ERC COMMANDS : 
+>> ERC COMMANDS : 
+
+**************************************************************
+                      DATA IN
+**************************************************************
+>> CELL LIST : CELL NAME            DIRECTORY NAME       REMOVED             
+   In 'shpark.prj' PROJECT
+                 INV                  inv._00              NO                  
+                 NAND                 nand._00             NO                  
+                 BUFFER               buffer._00           NO                  
+                 CMOS_LATCH           CMOS_latch._00       NO                  
+                 LATCHVER2            latchver2._00        NO                  
+                 DFF                  DFF._00              NO                  
+                 DFF2                 DFF2._00             NO                  
+                 DIV5N6               div5n6._00           NO                  
+>> READ-IN 'DIV5N6' cell
+   # of polygon 132       
+   # of path    0         
+   # of text    23        
+   # of sref    5         
+   # of aref    0         
+   # of circle/ellipse/arcdonut    0         
+   # of ellipse    0         
+>> READ-IN 'BUFFER' cell
+   # of polygon 35        
+   # of path    0         
+   # of text    4         
+   # of sref    1         
+   # of aref    0         
+   # of circle/ellipse/arcdonut    0         
+   # of ellipse    0         
+>> READ-IN 'NAND' cell
+   # of polygon 39        
+   # of path    0         
+   # of text    5         
+   # of sref    0         
+   # of aref    0         
+   # of circle/ellipse/arcdonut    0         
+   # of ellipse    0         
+>> READ-IN 'DFF2' cell
+   # of polygon 43        
+   # of path    0         
+   # of text    12        
+   # of sref    3         
+   # of aref    0         
+   # of circle/ellipse/arcdonut    0         
+   # of ellipse    0         
+>> READ-IN 'INV' cell
+   # of polygon 28        
+   # of path    0         
+   # of text    4         
+   # of sref    0         
+   # of aref    0         
+   # of circle/ellipse/arcdonut    0         
+   # of ellipse    0         
+>> READ-IN 'CMOS_LATCH' cell
+   # of polygon 39        
+   # of path    0         
+   # of text    9         
+   # of sref    2         
+   # of aref    0         
+   # of circle/ellipse/arcdonut    0         
+   # of ellipse    0         
+
+**************************************************************
+                      OPEN THE VERIFICATION ERROR FILE
+**************************************************************
+   OPEN THE 'ERC' FILE TO RECORD THE VERIFICATION ERRORS
+
+**************************************************************
+                      OPEN THE VERIFICATION REPORT FILE
+**************************************************************
+   OPEN THE 'ERC' FILE TO RECORD THE VERIFICATION REPORT
+
+**************************************************************
+                      CHECKING THE GEOMETRIES
+**************************************************************
+
+**************************************************************
+                      EXPAND AND GENERATE THE EDGE FILES
+**************************************************************
+>> GENERATE EDGE FILE FOR 'NWELL' LAYER
+   '36' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'ACTIVE' LAYER
+   '214' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'THK_ACTIVE' LAYER
+   '0' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'POLY' LAYER
+   '108' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'NPLUS' LAYER
+   '100' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'PPLUS' LAYER
+   '100' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'POLY2' LAYER
+   '0' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'CONTACT' LAYER
+   '570' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'VIA' LAYER
+   '160' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'METAL1' LAYER
+   '342' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'METAL2' LAYER
+   '137' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'VIA2' LAYER
+   '34' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'METAL3' LAYER
+   '31' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'VIA3' LAYER
+   '0' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'METAL4' LAYER
+   '0' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'GLASS' LAYER
+   '0' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'PROBE' LAYER
+   '0' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'RES_MASK' LAYER
+   '0' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'POLYTXT' LAYER
+   '0' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'ME1TXT' LAYER
+   '0' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'ME2TXT' LAYER
+   '0' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'ME3TXT' LAYER
+   '0' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'ME4TXT' LAYER
+   '0' EDGES GENERATED
+
+**************************************************************
+                      GENERATE COMPOSITE/HCELL TEXT
+**************************************************************
+>> CREATE OUTPUT SPICE FILE 'EXTRACT' ...
+>> CREATE DEVICE SHAPE FILE 'devshape.1' ...
+
+**************************************************************
+                      ID LABEL
+**************************************************************
+>> IDENTIFY THE 'NWELL' LAYER TEXT TO 'NWELL' LAYER
+>> IDENTIFY THE 'ACTIVE' LAYER TEXT TO 'ACTIVE' LAYER
+>> IDENTIFY THE 'THK_ACTIVE' LAYER TEXT TO 'THK_ACTIVE' LAYER
+>> IDENTIFY THE 'POLY' LAYER TEXT TO 'POLY' LAYER
+>> IDENTIFY THE 'NPLUS' LAYER TEXT TO 'NPLUS' LAYER
+>> IDENTIFY THE 'PPLUS' LAYER TEXT TO 'PPLUS' LAYER
+>> IDENTIFY THE 'POLY2' LAYER TEXT TO 'POLY2' LAYER
+>> IDENTIFY THE 'CONTACT' LAYER TEXT TO 'CONTACT' LAYER
+>> IDENTIFY THE 'VIA' LAYER TEXT TO 'VIA' LAYER
+>> IDENTIFY THE 'METAL1' LAYER TEXT TO 'METAL1' LAYER
+>> IDENTIFY THE 'METAL2' LAYER TEXT TO 'METAL2' LAYER
+>> IDENTIFY THE 'VIA2' LAYER TEXT TO 'VIA2' LAYER
+>> IDENTIFY THE 'METAL3' LAYER TEXT TO 'METAL3' LAYER
+>> IDENTIFY THE 'VIA3' LAYER TEXT TO 'VIA3' LAYER
+>> IDENTIFY THE 'METAL4' LAYER TEXT TO 'METAL4' LAYER
+>> IDENTIFY THE 'GLASS' LAYER TEXT TO 'GLASS' LAYER
+>> IDENTIFY THE 'PROBE' LAYER TEXT TO 'PROBE' LAYER
+>> IDENTIFY THE 'RES_MASK' LAYER TEXT TO 'RES_MASK' LAYER
+>> IDENTIFY THE 'POLYTXT' LAYER TEXT TO 'POLYTXT' LAYER
+>> IDENTIFY THE 'ME1TXT' LAYER TEXT TO 'ME1TXT' LAYER
+>> IDENTIFY THE 'ME2TXT' LAYER TEXT TO 'ME2TXT' LAYER
+>> IDENTIFY THE 'ME3TXT' LAYER TEXT TO 'ME3TXT' LAYER
+>> IDENTIFY THE 'ME4TXT' LAYER TEXT TO 'ME4TXT' LAYER
+
+**************************************************************
+                      BOOLEAN OPERATION
+**************************************************************
+>> GENERATE 'PSUB' FROM 'PBULK' NOT 'NWELL' ...
+   '2' AND '36' TO '38' EDGES
+>> GENERATE 'PACTIVE' FROM 'ACTIVE' AND 'PPLUS' ...
+   '214' AND '100' TO '114' EDGES
+>> GENERATE 'NACTIVE' FROM 'ACTIVE' AND 'NPLUS' ...
+   '214' AND '100' TO '100' EDGES
+>> GENERATE 'ALLSELECT' FROM 'PPLUS' OR 'NPLUS' ...
+   '100' AND '100' TO '100' EDGES
+>> GENERATE 'PGATE' FROM 'PACTIVE' AND 'POLY' ...
+   '114' AND '108' TO '54' EDGES
+>> GENERATE 'NGATE' FROM 'NACTIVE' AND 'POLY' ...
+   '100' AND '108' TO '54' EDGES
+>> GENERATE 'NSD' FROM 'NACTIVE' NOT 'POLY' ...
+   '100' AND '108' TO '154' EDGES
+>> GENERATE 'PSD' FROM 'PACTIVE' NOT 'POLY' ...
+   '114' AND '108' TO '168' EDGES
+>> GENERATE 'PPLUG' FROM 'PSUB' AND 'PSD' ...
+   '38' AND '168' TO '64' EDGES
+>> GENERATE 'NPLUG' FROM 'NWELL' AND 'NSD' ...
+   '36' AND '154' TO '50' EDGES
+>> GENERATE 'PPCONT' FROM 'PPLUG' AND 'CONTACT' ...
+   '64' AND '570' TO '100' EDGES
+>> GENERATE 'NPCONT' FROM 'NPLUG' AND 'CONTACT' ...
+   '50' AND '570' TO '104' EDGES
+>> GENERATE 'POLRES' FROM 'POLY' AND 'RES_MASK' ...
+   '108' AND '0' TO '0' EDGES
+>> GENERATE 'IPOLY' FROM 'POLY' NOT 'POLRES' ...
+   '108' AND '0' TO '108' EDGES
+>> GENERATE 'POLYCAP' FROM 'POLY' AND 'POLY2' ...
+   '108' AND '0' TO '0' EDGES
+>> GENERATE 'ME1POLY' FROM 'METAL1' AND 'IPOLY' ...
+   '342' AND '108' TO '70' EDGES
+>> GENERATE 'ME2POLY' FROM 'METAL2' AND 'IPOLY' ...
+   '137' AND '108' TO '37' EDGES
+>> GENERATE 'ME1ME2' FROM 'METAL1' AND 'METAL2' ...
+   '342' AND '137' TO '249' EDGES
+>> GENERATE 'PDIO' FROM 'PSD' AND 'NWELL' ...
+   '168' AND '36' TO '104' EDGES
+>> GENERATE 'NDIO' FROM 'NSD' AND 'PSUB' ...
+   '154' AND '38' TO '104' EDGES
+
+**************************************************************
+                      REGION
+**************************************************************
+>> LAYER 'METAL4' IS IDENTIFIED FROM 2 to 1 REGIONS
+>> LAYER 'METAL3' IS IDENTIFIED FROM 2 to 9 REGIONS
+>> LAYER 'METAL2' IS IDENTIFIED FROM 10 to 55 REGIONS
+>> LAYER 'METAL1' IS IDENTIFIED FROM 56 to 142 REGIONS
+>> LAYER 'POLY2' IS IDENTIFIED FROM 143 to 142 REGIONS
+>> LAYER 'IPOLY' IS IDENTIFIED FROM 143 to 169 REGIONS
+>> LAYER 'NSD' IS IDENTIFIED FROM 170 to 246 REGIONS
+>> LAYER 'PSD' IS IDENTIFIED FROM 247 to 330 REGIONS
+>> LAYER 'NWELL' IS IDENTIFIED FROM 331 to 348 REGIONS
+>> LAYER 'PSUB' IS IDENTIFIED FROM 349 to 349 REGIONS
+
+**************************************************************
+                      BOOLEAN OPERATION
+**************************************************************
+>> GENERATE '0NPCONT' FROM 'NSD' AND 'NPCONT' ...
+   '154' AND '104' TO '104' EDGES
+>> GENERATE '0PPCONT' FROM 'PSD' AND 'PPCONT' ...
+   '168' AND '100' TO '100' EDGES
+>> GENERATE '0CONTACT' FROM 'METAL1' AND 'CONTACT' ...
+   '342' AND '570' TO '570' EDGES
+>> GENERATE '0VIA' FROM 'METAL2' AND 'VIA' ...
+   '137' AND '160' TO '156' EDGES
+>> GENERATE '0VIA2' FROM 'METAL3' AND 'VIA2' ...
+   '31' AND '34' TO '32' EDGES
+>> GENERATE '0VIA3' FROM 'METAL4' AND 'VIA3' ...
+   '0' AND '0' TO '0' EDGES
+>> GENERATE '1CONTACT' FROM '0CONTACT' NOT 'POLY2' ...
+   '570' AND '0' TO '570' EDGES
+>> GENERATE '2CONTACT' FROM '1CONTACT' NOT 'IPOLY' ...
+   '570' AND '108' TO '516' EDGES
+>> GENERATE '3CONTACT' FROM '2CONTACT' NOT 'NSD' ...
+   '516' AND '154' TO '308' EDGES
+
+**************************************************************
+                      PRE ATTACH
+**************************************************************
+>> ATTACH 'ME4TXT' TEXT LAYER TO 'METAL4' LAYER
+   UNATTACHED 'ME4TXT' TEXT LAYER TO '0ME4TXT' LAYER
+>> DISPLAY UNATTACHED TEXT OF 'ME4TXT' TEXT LAYER
+>> ATTACH 'ME3TXT' TEXT LAYER TO 'METAL3' LAYER
+   UNATTACHED 'ME3TXT' TEXT LAYER TO '0ME3TXT' LAYER
+>> DISPLAY UNATTACHED TEXT OF 'ME3TXT' TEXT LAYER
+>> ATTACH 'ME2TXT' TEXT LAYER TO 'METAL2' LAYER
+   UNATTACHED 'ME2TXT' TEXT LAYER TO '0ME2TXT' LAYER
+>> DISPLAY UNATTACHED TEXT OF 'ME2TXT' TEXT LAYER
+>> ATTACH 'ME1TXT' TEXT LAYER TO 'METAL1' LAYER
+   UNATTACHED 'ME1TXT' TEXT LAYER TO '0ME1TXT' LAYER
+>> DISPLAY UNATTACHED TEXT OF 'ME1TXT' TEXT LAYER
+>> ATTACH 'EDTXALL' TEXT LAYER TO 'METAL4' LAYER
+   UNATTACHED 'EDTXALL' TEXT LAYER TO '0EDTXALL' LAYER
+>> ATTACH '0EDTXALL' TEXT LAYER TO 'METAL3' LAYER
+   UNATTACHED '0EDTXALL' TEXT LAYER TO '1EDTXALL' LAYER
+>> ATTACH '1EDTXALL' TEXT LAYER TO 'METAL2' LAYER
+   UNATTACHED '1EDTXALL' TEXT LAYER TO '2EDTXALL' LAYER
+>> ATTACH '2EDTXALL' TEXT LAYER TO 'METAL1' LAYER
+   UNATTACHED '2EDTXALL' TEXT LAYER TO '3EDTXALL' LAYER
+>> ATTACH '3EDTXALL' TEXT LAYER TO 'POLY2' LAYER
+   UNATTACHED '3EDTXALL' TEXT LAYER TO '4EDTXALL' LAYER
+>> ATTACH '4EDTXALL' TEXT LAYER TO 'IPOLY' LAYER
+   UNATTACHED '4EDTXALL' TEXT LAYER TO '5EDTXALL' LAYER
+>> ATTACH '5EDTXALL' TEXT LAYER TO 'NSD' LAYER
+   UNATTACHED '5EDTXALL' TEXT LAYER TO '6EDTXALL' LAYER
+>> ATTACH '6EDTXALL' TEXT LAYER TO 'PSD' LAYER
+   UNATTACHED '6EDTXALL' TEXT LAYER TO '7EDTXALL' LAYER
+>> ATTACH '7EDTXALL' TEXT LAYER TO 'NWELL' LAYER
+   UNATTACHED '7EDTXALL' TEXT LAYER TO '8EDTXALL' LAYER
+>> ATTACH '8EDTXALL' TEXT LAYER TO 'PSUB' LAYER
+   UNATTACHED '8EDTXALL' TEXT LAYER TO '9EDTXALL' LAYER
+>> DISPLAY UNATTACHED TEXT OF 'EDTXALL' TEXT LAYER
+>> ATTACH 'METAL4' TEXT LAYER TO 'METAL4' LAYER
+   UNATTACHED 'METAL4' TEXT LAYER TO '0METAL4' LAYER
+>> DISPLAY UNATTACHED TEXT OF 'METAL4' TEXT LAYER
+>> ATTACH 'METAL3' TEXT LAYER TO 'METAL3' LAYER
+   UNATTACHED 'METAL3' TEXT LAYER TO '0METAL3' LAYER
+>> DISPLAY UNATTACHED TEXT OF 'METAL3' TEXT LAYER
+>> ATTACH 'METAL2' TEXT LAYER TO 'METAL2' LAYER
+   UNATTACHED 'METAL2' TEXT LAYER TO '0METAL2' LAYER
+>> DISPLAY UNATTACHED TEXT OF 'METAL2' TEXT LAYER
+>> ATTACH 'METAL1' TEXT LAYER TO 'METAL1' LAYER
+   UNATTACHED 'METAL1' TEXT LAYER TO '0METAL1' LAYER
+>> DISPLAY UNATTACHED TEXT OF 'METAL1' TEXT LAYER
+>> ATTACH 'POLY2' TEXT LAYER TO 'POLY2' LAYER
+   UNATTACHED 'POLY2' TEXT LAYER TO '0POLY2' LAYER
+>> DISPLAY UNATTACHED TEXT OF 'POLY2' TEXT LAYER
+>> ATTACH 'IPOLY' TEXT LAYER TO 'IPOLY' LAYER
+   UNATTACHED 'IPOLY' TEXT LAYER TO '0IPOLY' LAYER
+>> DISPLAY UNATTACHED TEXT OF 'IPOLY' TEXT LAYER
+>> ATTACH 'NSD' TEXT LAYER TO 'NSD' LAYER
+   UNATTACHED 'NSD' TEXT LAYER TO '0NSD' LAYER
+>> DISPLAY UNATTACHED TEXT OF 'NSD' TEXT LAYER
+>> ATTACH 'PSD' TEXT LAYER TO 'PSD' LAYER
+   UNATTACHED 'PSD' TEXT LAYER TO '0PSD' LAYER
+>> DISPLAY UNATTACHED TEXT OF 'PSD' TEXT LAYER
+>> ATTACH 'NWELL' TEXT LAYER TO 'NWELL' LAYER
+   UNATTACHED 'NWELL' TEXT LAYER TO '0NWELL' LAYER
+>> DISPLAY UNATTACHED TEXT OF 'NWELL' TEXT LAYER
+>> ATTACH 'PSUB' TEXT LAYER TO 'PSUB' LAYER
+   UNATTACHED 'PSUB' TEXT LAYER TO '0PSUB' LAYER
+>> DISPLAY UNATTACHED TEXT OF 'PSUB' TEXT LAYER
+>> GENERATE 6PAD.TXT FILE ...
+
+**************************************************************
+                      NODAL
+**************************************************************
+>> CREATE THE NODAL RELATION TABLE
+>> CONNECT '0CONTACT' LAYER TO 'POLY2' LAYER
+>> CONNECT '1CONTACT' LAYER TO 'IPOLY' LAYER
+>> CONNECT '2CONTACT' LAYER TO 'NSD' LAYER
+>> CONNECT '3CONTACT' LAYER TO 'PSD' LAYER
+>> CONNECT '0VIA' LAYER TO 'METAL1' LAYER
+>> CONNECT '0VIA2' LAYER TO 'METAL2' LAYER
+>> CONNECT '0VIA3' LAYER TO 'METAL3' LAYER
+>> COMPRESS THE NODE INFORMATION TO CONSTRUCT THE COMPACT NET
+   70 NODES ARE IDENTIFIED FROM 350 REGIONS 
+>> NODE CONVERSION FROM 'METAL4' TO 'METAL4' LAYER
+>> NODE CONVERSION FROM 'METAL3' TO 'METAL3' LAYER
+>> NODE CONVERSION FROM 'METAL2' TO 'METAL2' LAYER
+>> NODE CONVERSION FROM 'METAL1' TO 'METAL1' LAYER
+>> NODE CONVERSION FROM 'POLY2' TO 'POLY2' LAYER
+>> NODE CONVERSION FROM 'IPOLY' TO 'IPOLY' LAYER
+>> NODE CONVERSION FROM 'NSD' TO 'NSD' LAYER
+>> NODE CONVERSION FROM 'PSD' TO 'PSD' LAYER
+>> NODE CONVERSION FROM 'NWELL' TO 'NWELL' LAYER
+>> NODE CONVERSION FROM 'PSUB' TO 'PSUB' LAYER
+>> NODE CONVERSION FROM '0NPCONT' TO '0NPCONT' LAYER
+>> NODE CONVERSION FROM '0PPCONT' TO '0PPCONT' LAYER
+>> NODE CONVERSION FROM '0CONTACT' TO '0CONTACT' LAYER
+>> NODE CONVERSION FROM '1CONTACT' TO '1CONTACT' LAYER
+>> NODE CONVERSION FROM '2CONTACT' TO '2CONTACT' LAYER
+>> NODE CONVERSION FROM '3CONTACT' TO '3CONTACT' LAYER
+>> NODE CONVERSION FROM '0VIA' TO '0VIA' LAYER
+>> NODE CONVERSION FROM '0VIA2' TO '0VIA2' LAYER
+>> NODE CONVERSION FROM '0VIA3' TO '0VIA3' LAYER
+
+**************************************************************
+                      POST ATTACH
+**************************************************************
+SAMELAB      :     GND:G      2          AND         17         ...
+SAMELAB      :     GND:G      2          AND         18         ...
+SAMELAB      :     GND:G      2          AND         22         ...
+SAMELAB      :     GND:G      2          AND         24         ...
+SAMELAB      :     GND:G      2          AND         25         ...
+SAMELAB      :     GND:G      2          AND         26         ...
+SAMELAB      :     GND:G      2          AND         30         ...
+SAMELAB      :     GND:G      2          AND         32         ...
+SAMELAB      :     GND:G      2          AND         36         ...
+SAMELAB      :     VDD:P      7          AND         12         ...
+SAMELAB      :     VDD:P      7          AND         13         ...
+SAMELAB      :     VDD:P      7          AND         16         ...
+SAMELAB      :     VDD:P      7          AND         20         ...
+SAMELAB      :     VDD:P      7          AND         27         ...
+SAMELAB      :     VDD:P      7          AND         31         ...
+SAMELAB      :     VDD:P      7          AND         33         ...
+SAMELAB      :     VDD:P      7          AND         35         ...
+SAMELAB      :     VDD:P      7          AND         37         ...
+>> GENERATE 9PAD.TXT FILE
+   LABEL 'GND:G' ---> 2 NODE
+   LABEL 'CLK' ---> 3 NODE
+   LABEL 'VDD:P' ---> 7 NODE
+   LABEL 'VDD:P' ---> 12 NODE
+   LABEL 'VDD:P' ---> 13 NODE
+   LABEL 'VDD:P' ---> 16 NODE
+   LABEL 'GND:G' ---> 17 NODE
+   LABEL 'GND:G' ---> 18 NODE
+   LABEL 'VDD:P' ---> 20 NODE
+   LABEL 'GND:G' ---> 22 NODE
+   LABEL 'GND:G' ---> 24 NODE
+   LABEL 'GND:G' ---> 25 NODE
+   LABEL 'GND:G' ---> 26 NODE
+   LABEL 'VDD:P' ---> 27 NODE
+   LABEL 'GND:G' ---> 30 NODE
+   LABEL 'VDD:P' ---> 31 NODE
+   LABEL 'GND:G' ---> 32 NODE
+   LABEL 'VDD:P' ---> 33 NODE
+   LABEL 'VDD:P' ---> 35 NODE
+   LABEL 'GND:G' ---> 36 NODE
+   LABEL 'VDD:P' ---> 37 NODE
+   LABEL 'Q' ---> 38 NODE
+   LABEL 'SEL' ---> 44 NODE
+
+**************************************************************
+                      VIRTUAL WIRING
+**************************************************************
+VIRTUAL WIRING : 'GND:G' AND 'GND:G' ...
+VIRTUAL WIRING : 'GND:G' AND 'GND:G' ...
+VIRTUAL WIRING : 'GND:G' AND 'GND:G' ...
+VIRTUAL WIRING : 'GND:G' AND 'GND:G' ...
+VIRTUAL WIRING : 'GND:G' AND 'GND:G' ...
+VIRTUAL WIRING : 'GND:G' AND 'GND:G' ...
+VIRTUAL WIRING : 'GND:G' AND 'GND:G' ...
+VIRTUAL WIRING : 'GND:G' AND 'GND:G' ...
+VIRTUAL WIRING : 'GND:G' AND 'GND:G' ...
+VIRTUAL WIRING : 'VDD:P' AND 'VDD:P' ...
+VIRTUAL WIRING : 'VDD:P' AND 'VDD:P' ...
+VIRTUAL WIRING : 'VDD:P' AND 'VDD:P' ...
+VIRTUAL WIRING : 'VDD:P' AND 'VDD:P' ...
+VIRTUAL WIRING : 'VDD:P' AND 'VDD:P' ...
+VIRTUAL WIRING : 'VDD:P' AND 'VDD:P' ...
+VIRTUAL WIRING : 'VDD:P' AND 'VDD:P' ...
+VIRTUAL WIRING : 'VDD:P' AND 'VDD:P' ...
+VIRTUAL WIRING : 'VDD:P' AND 'VDD:P' ...
+
+**************************************************************
+                      SCONNECT
+**************************************************************
+
+SCONNECT 'NWELL' BY '0NPCONT' ...
+
+
+SCONNECT 'PSUB' BY '0PPCONT' ...
+
+
+**************************************************************
+                      REGION
+**************************************************************
+>> LAYER 'POLRES' IS IDENTIFIED FROM 2 to 1 REGIONS
+>> LAYER 'PGATE' IS IDENTIFIED FROM 2 to 28 REGIONS
+>> LAYER 'NGATE' IS IDENTIFIED FROM 29 to 55 REGIONS
+>> LAYER 'POLYCAP' IS IDENTIFIED FROM 56 to 55 REGIONS
+>> LAYER 'ME1POLY' IS IDENTIFIED FROM 56 to 84 REGIONS
+>> LAYER 'ME2POLY' IS IDENTIFIED FROM 85 to 102 REGIONS
+>> LAYER 'ME1ME2' IS IDENTIFIED FROM 103 to 218 REGIONS
+
+**************************************************************
+                      CREATE NET
+**************************************************************
+>> GENERATE NET FILE 'RESIPOLYXP' BY TOUCH 'RESXP' AND 'IPOLY' ...
+>> GENERATE NET FILE 'MOSIPOLYXP' BY TOUCH 'MOSXP' AND 'IPOLY' ...
+   * PRINT THE CONNECTIVITY OF NODES
+>> GENERATE NET FILE 'MOSPSDXP' BY TOUCH 'MOSXP' AND 'PSD' ...
+   * PRINT THE CONNECTIVITY OF NODES
+>> GENERATE NET FILE 'MOSNWELLXP' BY TOUCH 'MOSXP' AND 'NWELL' ...
+   * PRINT THE CONNECTIVITY OF NODES
+>> GENERATE NET FILE 'MOSIPOLYXN' BY TOUCH 'MOSXN' AND 'IPOLY' ...
+   * PRINT THE CONNECTIVITY OF NODES
+>> GENERATE NET FILE 'MOSNSDXN' BY TOUCH 'MOSXN' AND 'NSD' ...
+   * PRINT THE CONNECTIVITY OF NODES
+>> GENERATE NET FILE 'MOSPSUBXN' BY TOUCH 'MOSXN' AND 'PSUB' ...
+   * PRINT THE CONNECTIVITY OF NODES
+>> GENERATE NET FILE 'CAPIPOLYXP' BY TOUCH 'CAPXP' AND 'IPOLY' ...
+>> GENERATE NET FILE 'CAPPOLY2XP' BY TOUCH 'CAPXP' AND 'POLY2' ...
+>> GENERATE NET FILE 'CAPMETAL1XA' BY TOUCH 'CAPXA' AND 'METAL1' ...
+   * PRINT THE CONNECTIVITY OF NODES
+>> GENERATE NET FILE 'CAPIPOLYXA' BY TOUCH 'CAPXA' AND 'IPOLY' ...
+   * PRINT THE CONNECTIVITY OF NODES
+>> GENERATE NET FILE 'CAPMETAL2XB' BY TOUCH 'CAPXB' AND 'METAL2' ...
+   * PRINT THE CONNECTIVITY OF NODES
+>> GENERATE NET FILE 'CAPIPOLYXB' BY TOUCH 'CAPXB' AND 'IPOLY' ...
+   * PRINT THE CONNECTIVITY OF NODES
+>> GENERATE NET FILE 'CAPMETAL1XC' BY TOUCH 'CAPXC' AND 'METAL1' ...
+   * PRINT THE CONNECTIVITY OF NODES
+>> GENERATE NET FILE 'CAPMETAL2XC' BY TOUCH 'CAPXC' AND 'METAL2' ...
+   * PRINT THE CONNECTIVITY OF NODES
+
+**************************************************************
+                      MERGE THE DEVICE REGION ID
+**************************************************************
+>> GENERATE THE DEVICE REGION ID 'MOSX8' FROM 'MOSXP' LAYER
+>> GENERATE THE DEVICE REGION ID 'MOSX8' BY MERGING 'MOSXN' AND 'MOSX8'
+>> GENERATE THE DEVICE REGION ID 'CAPX8' FROM 'CAPXP' LAYER
+>> GENERATE THE DEVICE REGION ID 'RESX8' FROM 'RESXP' LAYER
+
+**************************************************************
+                      CALCULATE PARAMETER
+**************************************************************
+>> GENERATE THE 'RESXP' WIDTH PARAMETER FILE FROM 'RESXP' AND 'IPOLY'
+>> GENERATE THE 'RESXP' AREA PARAMETER FILE FROM 'RESXP'
+>> GENERATE THE 'MOSXP' WIDTH PARAMETER FILE FROM 'MOSXP' AND 'PSD'
+>> GENERATE THE 'MOSXP' AREA PARAMETER FILE FROM 'MOSXP'
+>> GENERATE THE 'PSD' AREA PARAMETER FILE FROM 'PSD'
+>> GENERATE 'PSD' PERIMETER PARAMETER FILE FROM 'PSD' ...
+>> GENERATE THE 'MOSXN' WIDTH PARAMETER FILE FROM 'MOSXN' AND 'NSD'
+>> GENERATE THE 'MOSXN' AREA PARAMETER FILE FROM 'MOSXN'
+>> GENERATE THE 'NSD' AREA PARAMETER FILE FROM 'NSD'
+>> GENERATE 'NSD' PERIMETER PARAMETER FILE FROM 'NSD' ...
+>> GENERATE 'CAPXP' PERIMETER PARAMETER FILE FROM 'CAPXP' ...
+>> GENERATE THE 'CAPXP' AREA PARAMETER FILE FROM 'CAPXP'
+>> GENERATE 'CAPXA' PERIMETER PARAMETER FILE FROM 'CAPXA' ...
+>> GENERATE THE 'CAPXA' AREA PARAMETER FILE FROM 'CAPXA'
+>> GENERATE 'CAPXB' PERIMETER PARAMETER FILE FROM 'CAPXB' ...
+>> GENERATE THE 'CAPXB' AREA PARAMETER FILE FROM 'CAPXB'
+>> GENERATE 'CAPXC' PERIMETER PARAMETER FILE FROM 'CAPXC' ...
+>> GENERATE THE 'CAPXC' AREA PARAMETER FILE FROM 'CAPXC'
+
+**************************************************************
+                      GENERATE DEVICE NETWORK
+**************************************************************
+>> GENERATE THE RESISTOR NETWORK FILE 'RESXP' FROM 'RESIPOLYXP' NET FILE
+>> GENERATE THE MOS NETWORK FILE 'MOSXP' BY 'MOSIPOLYXP', 'MOSPSDXP' AND 'MOSNWELLXP' NET FILES
+>> GENERATE THE MOS NETWORK FILE 'MOSXN' BY 'MOSIPOLYXN', 'MOSNSDXN' AND 'MOSPSUBXN' NET FILES
+>> GENERATE THE CAPACITOR NETWORK FILE 'CAPXP' BY 'CAPIPOLYXP' AND 'CAPPOLY2XP' NET FILES
+>> GENERATE THE CAPACITOR NETWORK FILE 'CAPXA' BY 'CAPMETAL1XA' AND 'CAPIPOLYXA' NET FILES
+>> GENERATE THE CAPACITOR NETWORK FILE 'CAPXB' BY 'CAPMETAL2XB' AND 'CAPIPOLYXB' NET FILES
+>> GENERATE THE CAPACITOR NETWORK FILE 'CAPXC' BY 'CAPMETAL1XC' AND 'CAPMETAL2XC' NET FILES
+
+**************************************************************
+                      MERGE NET
+**************************************************************
+>> GENERATE NET FILE 'MOSALLXP' BY MERGING 'MOSIPOLYXP' AND 'MOSPSDXP' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : MOSIPOLYXP            = 27        
+   # OF RECORDS IN INPUT NET FILE  : MOSPSDXP              = 54        
+   # OF RECORDS IN OUTPUT NET FILE : MOSALLXP              = 81        
+>> GENERATE NET FILE 'MOSALLXP' BY MERGING 'MOSALLXP' AND 'MOSNWELLXP' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : MOSALLXP              = 81        
+   # OF RECORDS IN INPUT NET FILE  : MOSNWELLXP            = 27        
+   # OF RECORDS IN OUTPUT NET FILE : MOSALLXP              = 81        
+>> GENERATE NET FILE 'MOSALLXN' BY MERGING 'MOSIPOLYXN' AND 'MOSNSDXN' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : MOSIPOLYXN            = 27        
+   # OF RECORDS IN INPUT NET FILE  : MOSNSDXN              = 54        
+   # OF RECORDS IN OUTPUT NET FILE : MOSALLXN              = 81        
+>> GENERATE NET FILE 'MOSALLXN' BY MERGING 'MOSALLXN' AND 'MOSPSUBXN' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : MOSALLXN              = 81        
+   # OF RECORDS IN INPUT NET FILE  : MOSPSUBXN             = 27        
+   # OF RECORDS IN OUTPUT NET FILE : MOSALLXN              = 98        
+>> GENERATE NET FILE 'CAPALLXP' BY MERGING 'CAPIPOLYXP' AND 'CAPPOLY2XP' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : CAPIPOLYXP            = 0         
+   # OF RECORDS IN INPUT NET FILE  : CAPPOLY2XP            = 0         
+   # OF RECORDS IN OUTPUT NET FILE : CAPALLXP              = 0         
+>> GENERATE NET FILE 'CAPALLXA' BY MERGING 'CAPMETAL1XA' AND 'CAPIPOLYXA' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : CAPMETAL1XA           = 29        
+   # OF RECORDS IN INPUT NET FILE  : CAPIPOLYXA            = 29        
+   # OF RECORDS IN OUTPUT NET FILE : CAPALLXA              = 31        
+>> GENERATE NET FILE 'CAPALLXB' BY MERGING 'CAPMETAL2XB' AND 'CAPIPOLYXB' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : CAPMETAL2XB           = 18        
+   # OF RECORDS IN INPUT NET FILE  : CAPIPOLYXB            = 18        
+   # OF RECORDS IN OUTPUT NET FILE : CAPALLXB              = 24        
+>> GENERATE NET FILE 'CAPALLXC' BY MERGING 'CAPMETAL1XC' AND 'CAPMETAL2XC' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : CAPMETAL1XC           = 116       
+   # OF RECORDS IN INPUT NET FILE  : CAPMETAL2XC           = 116       
+   # OF RECORDS IN OUTPUT NET FILE : CAPALLXC              = 154       
+>> COPY THE NET FILE TO 'RESIPOLYX8' FROM 'RESIPOLYXP'
+   # OF RECORDS IN INPUT NET FILE  : RESIPOLYXP            = 0         
+   # OF RECORDS IN OUTPUT NET FILE : RESIPOLYX8            = 0         
+>> GENERATE NET FILE 'MOSIPOLYX8' BY MERGING 'MOSIPOLYXP' AND 'MOSIPOLYXN' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : MOSIPOLYXP            = 27        
+   # OF RECORDS IN INPUT NET FILE  : MOSIPOLYXN            = 27        
+   # OF RECORDS IN OUTPUT NET FILE : MOSIPOLYX8            = 54        
+>> COPY THE NET FILE TO 'MOSPSDX8' FROM 'MOSPSDXP'
+   # OF RECORDS IN INPUT NET FILE  : MOSPSDXP              = 54        
+   # OF RECORDS IN OUTPUT NET FILE : MOSPSDX8              = 54        
+>> COPY THE NET FILE TO 'MOSNWELLX8' FROM 'MOSNWELLXP'
+   # OF RECORDS IN INPUT NET FILE  : MOSNWELLXP            = 27        
+   # OF RECORDS IN OUTPUT NET FILE : MOSNWELLX8            = 27        
+>> GENERATE NET FILE 'MOSIPOLYX8' BY MERGING 'MOSIPOLYXP' AND 'MOSIPOLYXN' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : MOSIPOLYXP            = 27        
+   # OF RECORDS IN INPUT NET FILE  : MOSIPOLYXN            = 27        
+   # OF RECORDS IN OUTPUT NET FILE : MOSIPOLYX8            = 54        
+>> COPY THE NET FILE TO 'MOSNSDX8' FROM 'MOSNSDXN'
+   # OF RECORDS IN INPUT NET FILE  : MOSNSDXN              = 54        
+   # OF RECORDS IN OUTPUT NET FILE : MOSNSDX8              = 54        
+>> COPY THE NET FILE TO 'MOSPSUBX8' FROM 'MOSPSUBXN'
+   # OF RECORDS IN INPUT NET FILE  : MOSPSUBXN             = 27        
+   # OF RECORDS IN OUTPUT NET FILE : MOSPSUBX8             = 27        
+>> GENERATE NET FILE 'CAPIPOLYX8' BY MERGING 'CAPIPOLYXP' AND 'CAPIPOLYXA' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : CAPIPOLYXP            = 0         
+   # OF RECORDS IN INPUT NET FILE  : CAPIPOLYXA            = 29        
+   # OF RECORDS IN OUTPUT NET FILE : CAPIPOLYX8            = 29        
+>> GENERATE NET FILE 'CAPIPOLYX8' BY MERGING 'CAPIPOLYX8' AND 'CAPIPOLYXB' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : CAPIPOLYX8            = 29        
+   # OF RECORDS IN INPUT NET FILE  : CAPIPOLYXB            = 18        
+   # OF RECORDS IN OUTPUT NET FILE : CAPIPOLYX8            = 47        
+>> COPY THE NET FILE TO 'CAPPOLY2X8' FROM 'CAPPOLY2XP'
+   # OF RECORDS IN INPUT NET FILE  : CAPPOLY2XP            = 0         
+   # OF RECORDS IN OUTPUT NET FILE : CAPPOLY2X8            = 0         
+>> GENERATE NET FILE 'CAPMETAL1X8' BY MERGING 'CAPMETAL1XA' AND 'CAPMETAL1XC' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : CAPMETAL1XA           = 29        
+   # OF RECORDS IN INPUT NET FILE  : CAPMETAL1XC           = 116       
+   # OF RECORDS IN OUTPUT NET FILE : CAPMETAL1X8           = 145       
+>> GENERATE NET FILE 'CAPIPOLYX8' BY MERGING 'CAPIPOLYXP' AND 'CAPIPOLYXA' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : CAPIPOLYXP            = 0         
+   # OF RECORDS IN INPUT NET FILE  : CAPIPOLYXA            = 29        
+   # OF RECORDS IN OUTPUT NET FILE : CAPIPOLYX8            = 29        
+>> GENERATE NET FILE 'CAPIPOLYX8' BY MERGING 'CAPIPOLYX8' AND 'CAPIPOLYXB' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : CAPIPOLYX8            = 29        
+   # OF RECORDS IN INPUT NET FILE  : CAPIPOLYXB            = 18        
+   # OF RECORDS IN OUTPUT NET FILE : CAPIPOLYX8            = 47        
+>> GENERATE NET FILE 'CAPMETAL2X8' BY MERGING 'CAPMETAL2XB' AND 'CAPMETAL2XC' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : CAPMETAL2XB           = 18        
+   # OF RECORDS IN INPUT NET FILE  : CAPMETAL2XC           = 116       
+   # OF RECORDS IN OUTPUT NET FILE : CAPMETAL2X8           = 134       
+>> GENERATE NET FILE 'CAPIPOLYX8' BY MERGING 'CAPIPOLYXP' AND 'CAPIPOLYXA' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : CAPIPOLYXP            = 0         
+   # OF RECORDS IN INPUT NET FILE  : CAPIPOLYXA            = 29        
+   # OF RECORDS IN OUTPUT NET FILE : CAPIPOLYX8            = 29        
+>> GENERATE NET FILE 'CAPIPOLYX8' BY MERGING 'CAPIPOLYX8' AND 'CAPIPOLYXB' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : CAPIPOLYX8            = 29        
+   # OF RECORDS IN INPUT NET FILE  : CAPIPOLYXB            = 18        
+   # OF RECORDS IN OUTPUT NET FILE : CAPIPOLYX8            = 47        
+>> GENERATE NET FILE 'CAPMETAL1X8' BY MERGING 'CAPMETAL1XA' AND 'CAPMETAL1XC' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : CAPMETAL1XA           = 29        
+   # OF RECORDS IN INPUT NET FILE  : CAPMETAL1XC           = 116       
+   # OF RECORDS IN OUTPUT NET FILE : CAPMETAL1X8           = 145       
+>> GENERATE NET FILE 'CAPMETAL2X8' BY MERGING 'CAPMETAL2XB' AND 'CAPMETAL2XC' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : CAPMETAL2XB           = 18        
+   # OF RECORDS IN INPUT NET FILE  : CAPMETAL2XC           = 116       
+   # OF RECORDS IN OUTPUT NET FILE : CAPMETAL2X8           = 134       
+>> GENERATE NET FILE 'MOSALLX8' BY MERGING 'MOSALLXP' AND 'MOSALLXN' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : MOSALLXP              = 81        
+   # OF RECORDS IN INPUT NET FILE  : MOSALLXN              = 98        
+   # OF RECORDS IN OUTPUT NET FILE : MOSALLX8              = 179       
+>> GENERATE NET FILE 'MOSALLX8' BY MERGING 'MOSALLXP' AND 'MOSALLXN' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : MOSALLXP              = 81        
+   # OF RECORDS IN INPUT NET FILE  : MOSALLXN              = 98        
+   # OF RECORDS IN OUTPUT NET FILE : MOSALLX8              = 179       
+>> GENERATE NET FILE 'CAPALLX8' BY MERGING 'CAPALLXP' AND 'CAPALLXA' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : CAPALLXP              = 0         
+   # OF RECORDS IN INPUT NET FILE  : CAPALLXA              = 31        
+   # OF RECORDS IN OUTPUT NET FILE : CAPALLX8              = 31        
+>> GENERATE NET FILE 'CAPALLX8' BY MERGING 'CAPALLX8' AND 'CAPALLXB' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : CAPALLX8              = 31        
+   # OF RECORDS IN INPUT NET FILE  : CAPALLXB              = 24        
+   # OF RECORDS IN OUTPUT NET FILE : CAPALLX8              = 55        
+>> GENERATE NET FILE 'CAPALLX8' BY MERGING 'CAPALLX8' AND 'CAPALLXC' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : CAPALLX8              = 55        
+   # OF RECORDS IN INPUT NET FILE  : CAPALLXC              = 154       
+   # OF RECORDS IN OUTPUT NET FILE : CAPALLX8              = 209       
+>> GENERATE NET FILE 'CAPALLX8' BY MERGING 'CAPALLXP' AND 'CAPALLXA' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : CAPALLXP              = 0         
+   # OF RECORDS IN INPUT NET FILE  : CAPALLXA              = 31        
+   # OF RECORDS IN OUTPUT NET FILE : CAPALLX8              = 31        
+>> GENERATE NET FILE 'CAPALLX8' BY MERGING 'CAPALLX8' AND 'CAPALLXB' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : CAPALLX8              = 31        
+   # OF RECORDS IN INPUT NET FILE  : CAPALLXB              = 24        
+   # OF RECORDS IN OUTPUT NET FILE : CAPALLX8              = 55        
+>> GENERATE NET FILE 'CAPALLX8' BY MERGING 'CAPALLX8' AND 'CAPALLXC' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : CAPALLX8              = 55        
+   # OF RECORDS IN INPUT NET FILE  : CAPALLXC              = 154       
+   # OF RECORDS IN OUTPUT NET FILE : CAPALLX8              = 209       
+>> GENERATE NET FILE 'CAPALLX8' BY MERGING 'CAPALLXP' AND 'CAPALLXA' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : CAPALLXP              = 0         
+   # OF RECORDS IN INPUT NET FILE  : CAPALLXA              = 31        
+   # OF RECORDS IN OUTPUT NET FILE : CAPALLX8              = 31        
+>> GENERATE NET FILE 'CAPALLX8' BY MERGING 'CAPALLX8' AND 'CAPALLXB' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : CAPALLX8              = 31        
+   # OF RECORDS IN INPUT NET FILE  : CAPALLXB              = 24        
+   # OF RECORDS IN OUTPUT NET FILE : CAPALLX8              = 55        
+>> GENERATE NET FILE 'CAPALLX8' BY MERGING 'CAPALLX8' AND 'CAPALLXC' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : CAPALLX8              = 55        
+   # OF RECORDS IN INPUT NET FILE  : CAPALLXC              = 154       
+   # OF RECORDS IN OUTPUT NET FILE : CAPALLX8              = 209       
+>> GENERATE NET FILE 'CAPALLX8' BY MERGING 'CAPALLXP' AND 'CAPALLXA' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : CAPALLXP              = 0         
+   # OF RECORDS IN INPUT NET FILE  : CAPALLXA              = 31        
+   # OF RECORDS IN OUTPUT NET FILE : CAPALLX8              = 31        
+>> GENERATE NET FILE 'CAPALLX8' BY MERGING 'CAPALLX8' AND 'CAPALLXB' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : CAPALLX8              = 31        
+   # OF RECORDS IN INPUT NET FILE  : CAPALLXB              = 24        
+   # OF RECORDS IN OUTPUT NET FILE : CAPALLX8              = 55        
+>> GENERATE NET FILE 'CAPALLX8' BY MERGING 'CAPALLX8' AND 'CAPALLXC' NET FILES
+   # OF RECORDS IN INPUT NET FILE  : CAPALLX8              = 55        
+   # OF RECORDS IN INPUT NET FILE  : CAPALLXC              = 154       
+   # OF RECORDS IN OUTPUT NET FILE : CAPALLX8              = 209       
+
+**************************************************************
+                      ERC CHECK
+**************************************************************
+>> INITIALIZE THE ERC CHECK MODULE
+   READ THE 'METAL4' EDGE FILE
+   READ THE 'METAL3' EDGE FILE
+   READ THE 'METAL2' EDGE FILE
+   READ THE 'METAL1' EDGE FILE
+   READ THE 'POLY2' EDGE FILE
+   READ THE 'IPOLY' EDGE FILE
+   READ THE 'NSD' EDGE FILE
+   READ THE 'PSD' EDGE FILE
+   READ THE 'NWELL' EDGE FILE
+   READ THE 'PSUB' EDGE FILE
+   READ THE '0NPCONT' EDGE FILE
+   READ THE '0PPCONT' EDGE FILE
+   READ THE '0CONTACT' EDGE FILE
+   READ THE '1CONTACT' EDGE FILE
+   READ THE '2CONTACT' EDGE FILE
+   READ THE '3CONTACT' EDGE FILE
+   READ THE '0VIA' EDGE FILE
+   READ THE '0VIA2' EDGE FILE
+   READ THE '0VIA3' EDGE FILE
+   SET THE ERC FLAGS
+>> ERC CHECK : SHORT PATH
+   RESET THE ERC FLAGS
+   MERGE THE ERC FLAGS
+   GENERATE THE '6TEMP' ERC OUTPUT
+   FILTER THE 'METAL4[14]' EDGE FILE
+   GENERATE THE 'METAL4' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE 'METAL4' TO '6TEMP'
+
+   FILTER THE 'METAL3[12]' EDGE FILE
+   GENERATE THE 'METAL3' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE 'METAL3' TO '6TEMP'
+
+   FILTER THE 'METAL2[10]' EDGE FILE
+   GENERATE THE 'METAL2' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE 'METAL2' TO '6TEMP'
+
+   FILTER THE 'METAL1[9]' EDGE FILE
+   GENERATE THE 'METAL1' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE 'METAL1' TO '6TEMP'
+
+   FILTER THE 'POLY2[6]' EDGE FILE
+   GENERATE THE 'POLY2' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE 'POLY2' TO '6TEMP'
+
+   FILTER THE 'IPOLY[37]' EDGE FILE
+   GENERATE THE 'IPOLY' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE 'IPOLY' TO '6TEMP'
+
+   FILTER THE 'NSD[30]' EDGE FILE
+   GENERATE THE 'NSD' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE 'NSD' TO '6TEMP'
+
+   FILTER THE 'PSD[31]' EDGE FILE
+   GENERATE THE 'PSD' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE 'PSD' TO '6TEMP'
+
+   FILTER THE 'NWELL[0]' EDGE FILE
+   GENERATE THE 'NWELL' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE 'NWELL' TO '6TEMP'
+
+   FILTER THE 'PSUB[24]' EDGE FILE
+   GENERATE THE 'PSUB' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE 'PSUB' TO '6TEMP'
+
+   FILTER THE '0NPCONT[-1]' EDGE FILE
+   GENERATE THE '0NPCONT' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE '0NPCONT' TO '6TEMP'
+
+   FILTER THE '0PPCONT[-1]' EDGE FILE
+   GENERATE THE '0PPCONT' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE '0PPCONT' TO '6TEMP'
+
+   FILTER THE '0CONTACT[-1]' EDGE FILE
+   GENERATE THE '0CONTACT' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE '0CONTACT' TO '6TEMP'
+
+   FILTER THE '1CONTACT[-1]' EDGE FILE
+   GENERATE THE '1CONTACT' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE '1CONTACT' TO '6TEMP'
+
+   FILTER THE '2CONTACT[-1]' EDGE FILE
+   GENERATE THE '2CONTACT' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE '2CONTACT' TO '6TEMP'
+
+   FILTER THE '3CONTACT[-1]' EDGE FILE
+   GENERATE THE '3CONTACT' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE '3CONTACT' TO '6TEMP'
+
+   FILTER THE '0VIA[-1]' EDGE FILE
+   GENERATE THE '0VIA' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE '0VIA' TO '6TEMP'
+
+   FILTER THE '0VIA2[-1]' EDGE FILE
+   GENERATE THE '0VIA2' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE '0VIA2' TO '6TEMP'
+
+   FILTER THE '0VIA3[-1]' EDGE FILE
+   GENERATE THE '0VIA3' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE '0VIA3' TO '6TEMP'
+
+
+**************************************************************
+                      ERC SHTEST
+**************************************************************
+>> CONNECT FOR SHORT CHECKING : 'NSD' AND '0NPCONT' LAYER
+>> CONNECT FOR SHORT CHECKING : '0NPCONT' AND 'NWELL' LAYER
+>> CONNECT FOR SHORT CHECKING : 'PSD' AND '0PPCONT' LAYER
+>> CONNECT FOR SHORT CHECKING : '0PPCONT' AND 'PSUB' LAYER
+>> CONNECT FOR SHORT CHECKING : 'METAL1' AND '0CONTACT' LAYER
+>> CONNECT FOR SHORT CHECKING : 'METAL1' AND '1CONTACT' LAYER
+>> CONNECT FOR SHORT CHECKING : 'METAL1' AND '2CONTACT' LAYER
+>> CONNECT FOR SHORT CHECKING : 'METAL1' AND '3CONTACT' LAYER
+>> CONNECT FOR SHORT CHECKING : '0CONTACT' AND 'POLY2' LAYER
+>> CONNECT FOR SHORT CHECKING : '1CONTACT' AND 'IPOLY' LAYER
+>> CONNECT FOR SHORT CHECKING : '2CONTACT' AND 'NSD' LAYER
+>> CONNECT FOR SHORT CHECKING : '3CONTACT' AND 'PSD' LAYER
+>> CONNECT FOR SHORT CHECKING : 'METAL2' AND '0VIA' LAYER
+>> CONNECT FOR SHORT CHECKING : '0VIA' AND 'METAL1' LAYER
+>> CONNECT FOR SHORT CHECKING : 'METAL3' AND '0VIA2' LAYER
+>> CONNECT FOR SHORT CHECKING : '0VIA2' AND 'METAL2' LAYER
+>> CONNECT FOR SHORT CHECKING : 'METAL4' AND '0VIA3' LAYER
+>> CONNECT FOR SHORT CHECKING : '0VIA3' AND 'METAL3' LAYER
+>> TOUCH FOR SHORT CHECKING : 'METAL4' LAYER
+>> TOUCH FOR SHORT CHECKING : 'METAL3' LAYER
+>> TOUCH FOR SHORT CHECKING : 'METAL2' LAYER
+>> TOUCH FOR SHORT CHECKING : 'METAL1' LAYER
+>> TOUCH FOR SHORT CHECKING : 'POLY2' LAYER
+>> TOUCH FOR SHORT CHECKING : 'IPOLY' LAYER
+>> TOUCH FOR SHORT CHECKING : 'NSD' LAYER
+>> TOUCH FOR SHORT CHECKING : 'PSD' LAYER
+>> TOUCH FOR SHORT CHECKING : 'NWELL' LAYER
+>> TOUCH FOR SHORT CHECKING : 'PSUB' LAYER
+>> ATTACH FOR SHORT CHECKING : 'ME4TXT' LABEL TO 'METAL4' LAYER
+>> ATTACH FOR SHORT CHECKING : 'ME3TXT' LABEL TO 'METAL3' LAYER
+>> ATTACH FOR SHORT CHECKING : 'ME2TXT' LABEL TO 'METAL2' LAYER
+>> ATTACH FOR SHORT CHECKING : 'ME1TXT' LABEL TO 'METAL1' LAYER
+>> FILTER TRAPEZOID NOT IN ERROR SHORT PATH
+
+**************************************************************
+                      ERC CHECK
+**************************************************************
+>> INITIALIZE THE ERC CHECK MODULE
+   READ THE 'MOSX8' EDGE FILE
+   SET THE ERC FLAGS
+>> ERC CHECK : ECONNECT BY 'MOSIPOLYXN' CONN 'VDD'
+   MERGE THE ERC FLAGS
+   GENERATE THE '6TEMP' ERC OUTPUT
+   FILTER THE 'MOSX8[0]' EDGE FILE
+   GENERATE THE 'MOSX8' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE 'MOSX8' TO '6TEMP'
+
+
+**************************************************************
+                      ERC CHECK
+**************************************************************
+>> INITIALIZE THE ERC CHECK MODULE
+   READ THE 'MOSX8' EDGE FILE
+   SET THE ERC FLAGS
+>> ERC CHECK : ECONNECT BY 'MOSIPOLYXP' CONN 'GND'
+   MERGE THE ERC FLAGS
+   GENERATE THE '6TEMP' ERC OUTPUT
+   FILTER THE 'MOSX8[0]' EDGE FILE
+   GENERATE THE 'MOSX8' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE 'MOSX8' TO '6TEMP'
+
+
+**************************************************************
+                      ERC CHECK
+**************************************************************
+>> INITIALIZE THE ERC CHECK MODULE
+   READ THE 'MOSX8' EDGE FILE
+   SET THE ERC FLAGS
+>> ERC CHECK : ECONNECT BY 'MOSPSDXP' CONN 'GND'
+   MERGE THE ERC FLAGS
+   GENERATE THE '6TEMP' ERC OUTPUT
+   FILTER THE 'MOSX8[0]' EDGE FILE
+   GENERATE THE 'MOSX8' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE 'MOSX8' TO '6TEMP'
+
+
+**************************************************************
+                      ERC CHECK
+**************************************************************
+>> INITIALIZE THE ERC CHECK MODULE
+   READ THE 'MOSX8' EDGE FILE
+   SET THE ERC FLAGS
+>> ERC CHECK : NDCOUNT BY 'MOSALLX8' EQ 1
+   MERGE THE ERC FLAGS
+   GENERATE THE '6TEMP' ERC OUTPUT
+   FILTER THE 'MOSX8[0]' EDGE FILE
+   GENERATE THE 'MOSX8' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE 'MOSX8' TO '6TEMP'
+
+
+**************************************************************
+                      ERC CHECK
+**************************************************************
+>> INITIALIZE THE ERC CHECK MODULE
+   READ THE 'PSUB' EDGE FILE
+   SET THE ERC FLAGS
+>> ERC CHECK : LCONNECT CONN 'VDD'
+   RESET THE ERC FLAGS
+   MERGE THE ERC FLAGS
+   GENERATE THE '6TEMP' ERC OUTPUT
+   FILTER THE 'PSUB[24]' EDGE FILE
+   GENERATE THE 'PSUB' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE 'PSUB' TO '6TEMP'
+
+
+**************************************************************
+                      ERC CHECK
+**************************************************************
+>> INITIALIZE THE ERC CHECK MODULE
+   READ THE 'PSUB' EDGE FILE
+   SET THE ERC FLAGS
+>> ERC CHECK : LCONNECT DISC 'GND'
+   RESET THE ERC FLAGS
+   MERGE THE ERC FLAGS
+   GENERATE THE '6TEMP' ERC OUTPUT
+   FILTER THE 'PSUB[24]' EDGE FILE
+   GENERATE THE 'PSUB' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE 'PSUB' TO '6TEMP'
+
+
+**************************************************************
+                      ERC CHECK
+**************************************************************
+>> INITIALIZE THE ERC CHECK MODULE
+   READ THE 'METAL4' EDGE FILE
+   READ THE 'METAL3' EDGE FILE
+   READ THE 'METAL2' EDGE FILE
+   READ THE 'METAL1' EDGE FILE
+   READ THE 'POLY2' EDGE FILE
+   READ THE 'IPOLY' EDGE FILE
+   READ THE 'NSD' EDGE FILE
+   READ THE 'PSD' EDGE FILE
+   READ THE 'NWELL' EDGE FILE
+   READ THE 'PSUB' EDGE FILE
+   SET THE ERC FLAGS
+>> ERC CHECK : OPEN PATH
+   RESET THE ERC FLAGS
+   MERGE THE ERC FLAGS
+   GENERATE THE '6TEMP' ERC OUTPUT
+   FILTER THE 'METAL4[14]' EDGE FILE
+   GENERATE THE 'METAL4' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE 'METAL4' TO '6TEMP'
+
+   FILTER THE 'METAL3[12]' EDGE FILE
+   GENERATE THE 'METAL3' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE 'METAL3' TO '6TEMP'
+
+   FILTER THE 'METAL2[10]' EDGE FILE
+   GENERATE THE 'METAL2' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE 'METAL2' TO '6TEMP'
+
+   FILTER THE 'METAL1[9]' EDGE FILE
+   GENERATE THE 'METAL1' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE 'METAL1' TO '6TEMP'
+
+   FILTER THE 'POLY2[6]' EDGE FILE
+   GENERATE THE 'POLY2' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE 'POLY2' TO '6TEMP'
+
+   FILTER THE 'IPOLY[37]' EDGE FILE
+   GENERATE THE 'IPOLY' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE 'IPOLY' TO '6TEMP'
+
+   FILTER THE 'NSD[30]' EDGE FILE
+   GENERATE THE 'NSD' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE 'NSD' TO '6TEMP'
+
+   FILTER THE 'PSD[31]' EDGE FILE
+   GENERATE THE 'PSD' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE 'PSD' TO '6TEMP'
+
+   FILTER THE 'NWELL[0]' EDGE FILE
+   GENERATE THE 'NWELL' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE 'NWELL' TO '6TEMP'
+
+   FILTER THE 'PSUB[24]' EDGE FILE
+   GENERATE THE 'PSUB' OUTPUT TRAPEZOID FILE
+   TRAPEZOID RANGE START FROM 1
+   TRAPEZOID RANGE START TO 1
+   MERGE THE TRAPEZOID FILE 'PSUB' TO '6TEMP'
+
+
+**************************************************************
+                      MERGE CAP
+**************************************************************
+>> GENERATE CAPXA NET FILE FROM CAPXA NET FILE BY MERGING SAME CAPS INTO ONE.
+>> GENERATE CAPXB NET FILE FROM CAPXB NET FILE BY MERGING SAME CAPS INTO ONE.
+>> GENERATE CAPXC NET FILE FROM CAPXC NET FILE BY MERGING SAME CAPS INTO ONE.
+
+**************************************************************
+                      DISPLAY
+**************************************************************
+   OUTPUT 'RESXP' TO SPICE FILE 'EXTRACT' ...
+   OUTPUT 'RESXP' TO DEVICE SHAPE FILE 'devshape.1' ...
+   OUTPUT 'MOSXP' TO SPICE FILE 'EXTRACT' ...
+   OUTPUT 'MOSXP' TO DEVICE SHAPE FILE 'devshape.1' ...
+   OUTPUT 'MOSXN' TO SPICE FILE 'EXTRACT' ...
+   OUTPUT 'MOSXN' TO DEVICE SHAPE FILE 'devshape.1' ...
+   OUTPUT 'CAPXP' TO SPICE FILE 'EXTRACT' ...
+   OUTPUT 'CAPXP' TO DEVICE SHAPE FILE 'devshape.1' ...
+   OUTPUT 'CAPXA' TO SPICE FILE 'EXTRACT' ...
+   OUTPUT 'CAPXA' TO DEVICE SHAPE FILE 'devshape.1' ...
+   OUTPUT 'CAPXB' TO SPICE FILE 'EXTRACT' ...
+   OUTPUT 'CAPXB' TO DEVICE SHAPE FILE 'devshape.1' ...
+   OUTPUT 'CAPXC' TO SPICE FILE 'EXTRACT' ...
+   OUTPUT 'CAPXC' TO DEVICE SHAPE FILE 'devshape.1' ...
+
+**************************************************************
+                      GENERATE NET SHAPES
+**************************************************************
+>> CREATE OUTPUT NET SHAPE FILE 'netshape.1' ...
+
+**************************************************************
+                      WRITE THE VERIFICATION GDSII FILE
+**************************************************************
+   WRITE THE 'RESULT.GDS' FILE TO RECORD THE VERIFICATION GDSII
+
+**************************************************************
+                      CLOSE THE VERIFICATION ERROR FILE
+**************************************************************
+   CLOSE THE 'ERC' FILE TO RECORD THE VERIFICATION ERRORS
+
+**************************************************************
+                      CLOSE THE VERIFICATION REPORT FILE
+**************************************************************
+   CLOSE THE 'ERC' FILE TO RECORD THE VERIFICATION REPORT
+ 
+ * TOTAL ERROR(S) : DISPLAY[  0]/OUTPUT[  0] *
+ 
+*************** EXECUTION TIME ***************
+START EXECUTION TIME : 21:51:36
+END   EXECUTION TIME : 21:52:22
+**********************************************

@@ -1,0 +1,5 @@
+[CHIP]
+TECH_FILE	C:\MyCADPro\MyCAD example\Layout\Technology file\SCMOS_SCN4ME_SUBM.TEC
+LIB		1	C:\MyCADPro\MyCAD?example\Layout\work\inverter.prj	1585897801
+[COMMON]
+CELL	nand2	nand2._00

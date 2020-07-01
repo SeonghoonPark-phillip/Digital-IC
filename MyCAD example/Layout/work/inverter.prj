@@ -1,0 +1,5 @@
+[CHIP]
+TECH_FILE	C:\MyCADPro\MyCAD example\Layout\Technology file\SCMOS_SCN4ME_SUBM.TEC
+LIB		1	C:\MyCADPro\Demo\IDS\MyCell\Layout\Mycell.prj	1247223654
+[COMMON]
+CELL	inverter	inverter._00

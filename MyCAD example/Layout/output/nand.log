@@ -1,0 +1,169 @@
+
+                 *********************************************
+                 *                                           *
+                 *               M y S p i c e               *
+                 *                                           *
+                 *         Professional Version 5.5         *
+                 *                                           *
+                 *********************************************
+
+	Date: Sun May 31 17:41:10 2020
+	Circuit File: C:\MyCADPro\MyCAD example\Layout\output\nand.spc
+	Analysis: Transient
+
+**************************  Circuit Description  **************************
+
+     1:  NAND
+     2:  *******************************************************************************
+     3:  **            MyChip Station LayNet Pro 2017 
+     4:  **            Copyright(c) 1992-2017 MyCAD, Inc. 
+     5:  **            TIME = 17:32:21  DATE = 05/31/20 
+     6:  *******************************************************************************
+     7:  *'NAND' LAYOUT CELL
+     8:  *.GLOBAL IN1 OUT0 IN0 GND:G VDD:P
+     9:  M1          OUT0     IN1     VDD     VDD       PMOS W=2.4U L=0.4U AS=1.44P PS=1.2U AD=2.64P PD=4.6U
+    10:  M2          OUT0     IN0     VDD     VDD       PMOS W=2.4U L=0.4U AS=1.44P PS=1.2U AD=2.64P PD=4.6U
+    11:  *---------------------------------------------------
+    12:  *	# OF MOSEF PMOS       : 2
+    13:  *---------------------------------------------------
+    14:  *
+    15:  M3          OUT0     IN1       7     GND       NMOS W=2.4U L=0.4U AS=2.64P PS=4.6U AD=1.44P PD=1.2U
+    16:  M4           GND     IN0       7     GND       NMOS W=2.4U L=0.4U AS=2.64P PS=4.6U AD=1.44P PD=1.2U
+    17:  *---------------------------------------------------
+    18:  *	# OF MOSEF NMOS       : 2
+    19:  *---------------------------------------------------
+    20:  *
+    21:  C1          OUT0     IN1 0.00015088P 
+    22:  *---------------------------------------------------
+    23:  *	# OF CAPACITOR C          : 1
+    24:  *---------------------------------------------------
+    25:  *
+    26:  VDD VDD 0 DC 5
+    27:  VSS GND 0 DC 0
+    28:  VT_I1 IN0 GND PULSE ( 0 5 20N 2N 2N 48N 100N )
+    29:  VT_I2 IN1 GND PULSE ( 0 5 45N 2N 2N 48N 100N )
+    30:  CT_I3 OUT0 GND 0.1P
+    31:  .TRAN 1n 200n
+    32:  
+    33:  **********************************************************
+    34:  * TSMC 0352P4M
+    35:  * SPICE BSIM3 VERSION 3.1 PARAMETERS
+    36:  * SPICE 3f5 Level 8, Star-HSPICE Level 49, UTMOST Level 8
+    37:  .MODEL NMOS NMOS (                                 LEVEL   = 49
+    38:  +VERSION = 3.1            TNOM    = 27             TOX     = 7.6E-9
+    39:  +XJ      = 1E-7           NCH     = 2.3579E17      VTH0    = 0.5027514
+    40:  +K1      = 0.5359893      K2      = 0.0258172      K3      = 24.6606744
+    41:  +K3B     = 1.4055348      W0      = 5.355464E-6    NLX     = 2.404522E-9
+    42:  +DVT0W   = 0              DVT1W   = 0              DVT2W   = 0
+    43:  +DVT0    = -0.120252      DVT1    = 3.084588E-3    DVT2    = 0.470688
+    44:  +U0      = 417.429294     UA      = -1.40534E-13   UB      = 1.355832E-18
+    45:  +UC      = 2.939828E-11   VSAT    = 1.208882E5     A0      = 0.9319916
+    46:  +AGS     = 0.1686015      B0      = 1.288356E-6    B1      = 5E-6
+    47:  +KETA    = 0.0105706      A1      = 0              A2      = 1
+    48:  +RDSW    = 1.103044E3     PRWG    = 1.750872E-3    PRWB    = -0.0916512
+    49:  +WR      = 1              WINT    = 6.910593E-8    LINT    = 1.993462E-8
+    50:  +XL      = -2E-8          XW      = 0              DWG     = 1.047524E-9
+    51:  +DWB     = 1.084571E-8    VOFF    = -0.0906265     NFACTOR = 0.6164962
+    52:  +CIT     = 0              CDSC    = 5.145568E-6    CDSCD   = 0
+    53:  +CDSCB   = 0              ETA0    = 4.63499E-3     ETAB    = -9.189583E-4
+    54:  +DSUB    = 0.1150044      PCLM    = 0.7703416      PDIBLC1 = 0.3438859
+    55:  +PDIBLC2 = 8.526878E-3    PDIBLCB = 0.0845601      DROUT   = 0.6859339
+    56:  +PSCBE1  = 7.23225E9      PSCBE2  = 5.005586E-10   PVAG    = 0.4108257
+    57:  +DELTA   = 0.01           MOBMOD  = 1              PRT     = 0
+    58:  +UTE     = -1.5           KT1     = -0.11          KT1L    = 0
+    59:  +KT2     = 0.022          UA1     = 4.31E-9        UB1     = -7.61E-18
+    60:  +UC1     = -5.6E-11       AT      = 3.3E4          WL      = 0
+    61:  +WLN     = 1              WW      = -1.22182E-15   WWN     = 1.1837
+    62:  +WWL     = 0              LL      = 0              LLN     = 1
+    63:  +LW      = 0              LWN     = 1              LWL     = 0
+    64:  +CAPMOD  = 2              XPART   = 0.4            CGDO    = 2.95E-10
+    65:  +CGSO    = 2.95E-10       CGBO    = 1E-11          CJ      = 1.08158E-3
+    66:  +PB      = 0.7719669      MJ      = 0.3252096      CJSW    = 3.480034E-10
+    67:  +PBSW    = 0.99           MJSW    = 0.1576976      PVTH0   = -0.0122678
+    68:  +PRDSW   = -93.3365259    PK2     = -3.470912E-3   WKETA   = -3.503848E-3
+    69:  +LKETA   = -0.0105386      )
+    70:  *
+    71:  .MODEL PMOS PMOS (                                 LEVEL   = 49
+    72:  +VERSION = 3.1            TNOM    = 27             TOX     = 7.6E-9
+    73:  +XJ      = 1E-7           NCH     = 8.52E16        VTH0    = -0.6821549
+    74:  +K1      = 0.4197546      K2      = -6.11453E-3    K3      = 35.791795
+    75:  +K3B     = -2.796173      W0      = 1.990794E-6    NLX     = 4.309814E-7
+    76:  +DVT0W   = 0              DVT1W   = 0              DVT2W   = 0
+    77:  +DVT0    = 1.134781       DVT1    = 0.3272645      DVT2    = -1.051562E-3
+    78:  +U0      = 141.3184274    UA      = 1.024889E-10   UB      = 1.354611E-18
+    79:  +UC      = -3.30244E-11   VSAT    = 1.6171E5       A0      = 0.6693235
+    80:  +AGS     = 0.2959248      B0      = 2.86196E-6     B1      = 5E-6
+    81:  +KETA    = -6.382387E-3   A1      = 0              A2      = 1
+    82:  +RDSW    = 3.44286E3      PRWG    = -0.0626736     PRWB    = 0.0981315
+    83:  +WR      = 1              WINT    = 5.340142E-8    LINT    = 1.410986E-9
+    84:  +XL      = -2E-8          XW      = 0              DWG     = -4.209302E-9
+    85:  +DWB     = 1.12145E-8     VOFF    = -0.1154702     NFACTOR = 2
+    86:  +CIT     = 0              CDSC    = 0              CDSCD   = 0
+    87:  +CDSCB   = 4.724734E-5    ETA0    = 0.0115959      ETAB    = 2.08259E-4
+    88:  +DSUB    = 0.2766226      PCLM    = 7.8965744      PDIBLC1 = 1.97648E-3
+    89:  +PDIBLC2 = 8.825766E-3    PDIBLCB = 2.37472E-3     DROUT   = 0.4321935
+    90:  +PSCBE1  = 3.010835E10    PSCBE2  = 7.998967E-10   PVAG    = 15
+    91:  +DELTA   = 0.01           MOBMOD  = 1              PRT     = 0
+    92:  +UTE     = -1.5           KT1     = -0.11          KT1L    = 0
+    93:  +KT2     = 0.022          UA1     = 4.31E-9        UB1     = -7.61E-18
+    94:  +UC1     = -5.6E-11       AT      = 3.3E4          WL      = 0
+    95:  +WLN     = 1              WW      = -5.22182E-16   WWN     = 1.195
+    96:  +WWL     = 0              LL      = 0              LLN     = 1
+    97:  +LW      = 0              LWN     = 1              LWL     = 0
+    98:  +CAPMOD  = 2              XPART   = 0.4            CGDO    = 2.77E-10
+    99:  +CGSO    = 2.77E-10       CGBO    = 1E-11          CJ      = 1.417679E-3
+   100:  +PB      = 0.99           MJ      = 0.5636812      CJSW    = 4.292884E-10
+   101:  +PBSW    = 0.99           MJSW    = 0.3497357      PVTH0   = 0.0116448
+   102:  +PRDSW   = -58.3059685    PK2     = 1.654991E-3    WKETA   = -6.310553E-4
+   103:  +LKETA   = 1.189744E-3     )
+   104:  
+   105:  
+
+***************************  Model Parameters  ****************************
+
+
+***************  Device Parameters (Only for .op analysis)  ***************
+
+
+
+**************************  Analysis Parameters  **************************
+
+	Stepsize ............ : 1n
+	Final time .......... : 200n
+	Use Initial Conditions: Off
+
+
+
+**************  Options (Only those different from default)  **************
+
+
+
+*************************  Simulation Statistics  *************************
+
+	Total number of iterations.....................: 546
+	Number of iterations for transient analysis....: 522
+	Total number of timepoints.....................: 186
+	Number of timepoints accepted..................: 166
+	Number of timepoints rejected..................: 20
+	Total analysis time (sec)......................: 0.047
+	Transient analysis time (sec)..................: 0.047
+	Time spent in device loading (sec).............: 0
+	Time spent in L-U decomposition (sec)..........: 0
+	Time spent in matrix reordering (sec)..........: 0
+	Time spent in matrix solving (sec).............: 0
+	Time spent in transient L-U decomposition (sec): 0
+	Time spent in transient matrix solving (sec)...: 0
+
+***************************  Kernel Messages  *****************************
+
+Circuit: NAND
+
+Warning: parameter xl not supported; value ignored
+Warning: parameter xw not supported; value ignored
+Warning: parameter xl not supported; value ignored
+Warning: parameter xw not supported; value ignored
+Warning: Pd = 1.2e-006 is less than W for m4 in model nmos.
+Warning: Ps = 1.2e-006 is less than W for m2 in model pmos.
+Warning: vt_i2: no DC value, transient time 0 value used
+Warning: vt_i1: no DC value, transient time 0 value used
+

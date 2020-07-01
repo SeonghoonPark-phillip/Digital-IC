@@ -1,0 +1,20 @@
+***************************************************************************
+**            MyChip Station MyLVS Pro 2017
+**            Copyright(c) 1992-2017 MyCAD, Inc. 
+**            MyLVS Pro Reduction Result File.
+***************************************************************************
+
+* Source = C:\MyCADPro\MyCAD example\Layout\work\DFF._00\TOP_p2.net
+
+.GLOBAL	CLK D GND Q QB 
+.GLOBAL	VDD 
+
+INV	QB T_I7_I4_NNG	0	0
+INV	Q QB	0	0
+INV	I0_OUT0 CLK	0	0
+INV	I6_Q T_I6_QB	0	0
+INV	T_I6_QB T_I6_I4_NNG	0	0
+MT_I7_I3	T_I7_I4_NNG	CLK	I6_Q	GND	NMOS	W=1.20U L=400.00N	0	0
+MT_I7_I0	T_I7_I4_NNG	CLK	Q	Q	PMOS	W=2.40U L=400.00N	0	0
+MT_I6_I3	T_I6_I4_NNG	I0_OUT0	D	GND	NMOS	W=1.20U L=400.00N	0	0
+MT_I6_I0	T_I6_I4_NNG	I0_OUT0	I6_Q	I6_Q	PMOS	W=2.40U L=400.00N	0	0

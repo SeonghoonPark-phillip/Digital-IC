@@ -1,0 +1,17 @@
+[LOGIC]
+[COMMON]
+CELL buffer buffer
+CELL inv inv
+CELL nand nand
+CELL DFF DFF
+CELL SIM_tspcDFF SIM_tspcDFF
+CELL SIM_DFF SIM_DFF
+CELL CMOS_latch CMOS_latch
+CELL testDFF testDFF
+CELL latchwinv latchwinv
+CELL div5 div5
+CELL nor nor
+CELL NOR3 NOR3
+CELL div6 div6
+CELL div5n6 div5n6
+CELL sim_div5n6 sim_div5n6

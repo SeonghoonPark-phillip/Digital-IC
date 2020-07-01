@@ -1,0 +1,2257 @@
+
+**************************************************************
+                      PARSING THE RULE FILE
+**************************************************************
+;###################################################################################
+;# MYCAD, INC. SHALL NOT BE LIABLE FOR THE ACCURACY OF                             #
+;# THIS DESIGN RULE FILE OR IT'S ABILITY TO CAPTURE ERRORS.                        #
+;# THE USER IS RESPONSIBLE FOR THOROUGHLY TESTING AND IMPLEMENTING                 #
+;# IT'S FEATURES.                                                                  #
+;###################################################################################
+;
+;###################################################################################
+;# MOSIS SCMOS 0.35UM DESIGN RULE FOR MYCHIP (REF. HTTP://WWW.MOSIS.COM)           #
+;# TSMC (0.35UM N-WELL) SCN4ME_SUBM (LAMBDA=0.2 UM)			           #
+;# BY MYCAD SUPPORT GROUP							   #
+;#										   #
+;# SUPPORT INFORMATION:                                                            #
+;#                                                                                 #
+;# THIS RULE FILE IS SUPPORTED BY MYCAD, INC. CUSTOMER SUPPORT.                    #
+;# FOR CONTACT INFORMATION CONSULT SUPPORT@SELOCO.COM                              #
+;#                                                                                 #
+;# REVISION HISTORY:                                                               #
+;#                                                                                 #
+;# 08/17/2004      BUILD                                                           #
+;#                                                                                 #
+;# 08/20/2004      FIRST RELEASE                                                   #
+;# 11/30/2009      SECOND RELEASE BY JHPARK                                        #
+;#                 MODIFIED ENC AND AREA FOR DESIGN RULE ERROR                     #
+;###################################################################################
+;
+;###################################################################################
+;# DESCRIPTION BLOCK								   #
+;###################################################################################
+;
+;TECHNOLOGY LAYERS: NWELL ACTIVE THK_ACTIVE PPLUS NPLUS POLY POLY2 CONTACT 
+;                   METAL1 VIA METAL2 VIA2 METAL3 VIA3 METAL4
+;                   GLASS
+;                   PROBE (NON-FAB LAYER USED TO HIGHLIGHT PADS)
+;
+*DESCRIPTION
+LAMBDA = 0.2
+CHECK-MODE = FLAT
+;
+;
+;##################################################################################
+;# LAYER BLOCK									  #
+;##################################################################################
+;
+*LAYER
+SUBSTRATE = PBULK
+CONNECT-LAYER = PSUB NWELL PSD NSD POLY POLY2 METAL1 METAL2 METAL3 METAL4
+;
+;
+;##################################################################################
+;# OPERATION BLOCK								  #
+;##################################################################################
+;
+*OPERATION
+NOT	PBULK	NWELL	PSUB
+AND	ACTIVE	PPLUS	PACTIVE
+AND	ACTIVE	NPLUS	NACTIVE
+OR	PPLUS	NPLUS	ALLSELECT
+AND	PACTIVE	POLY	PGATE
+AND	NACTIVE	POLY	NGATE
+NOT	PACTIVE PGATE	PSD
+NOT	NACTIVE NGATE	NSD
+AND	PSUB	PSD	PPLUG
+AND	NWELL	NSD	NPLUG
+AND	PPLUG	CONTACT	PPCONT
+AND	NPLUG	CONTACT	NPCONT
+; INTERLAYER CONNECTION
+CONNECT		METAL4	METAL3	BY	VIA3
+CONNECT		METAL3	METAL2	BY	VIA2
+CONNECT		METAL2	METAL1	BY	VIA
+CONNECT		METAL1	POLY	BY	CONTACT
+CONNECT		METAL1	POLY2	BY	CONTACT
+CONNECT		METAL1	PSD	BY	CONTACT
+CONNECT		METAL1	NSD	BY	CONTACT
+; SUBSTRATE & WELL CONNECTION
+SCONNECT	PSD	PSUB	BY	PPCONT
+SCONNECT	NSD	NWELL	BY	NPCONT
+;
+;###############################################################################
+; N-WELL(LAMBDA BASE)
+;###############################################################################
+WIDTH		NWELL LT 12		"RULE 1.1:WIDTH(N-WELL) < 12"
+EXT[N]		NWELL LT 18		"RULE 1.2:SPACE(N-WELL) DIFF VTG < 18"
+EXT[N']		NWELL LT 6		"RULE 1.3:SPACE(N-WELL) SAME VTG < 6"
+;###############################################################################
+; ACTIVE(LAMBDA BASE)
+;###############################################################################
+WIDTH		ACTIVE LT 3		"RULE 2.1:WIDTH(ACTIVE) < 3"
+EXT		ACTIVE LT 3		"RULE 2.2:SPACE(ACTIVE) < 3"
+ENC		PACTIVE NWELL LT 6 	"RULE 2.3.1:WELL EDGE WITH PACTIVE < 6"
+EXT		NACTIVE NWELL LT 6 	"RULE 2.3.2:WELL EDGE WITH NACTIVE < 6"
+ENC		NPLUG NWELL LT 3  	"RULE 2.4.1:WELL CONTACT SPACE WITH NPLUG < 3"
+EXT		PPLUG NWELL LT 3   	"RULE 2.4.2:WELL CONTACT SPACE WITH PPLUG < 3"
+AND	NACTIVE	PACTIVE	NPACT
+ERROR	NPACT				"RULE 2.5.1:NO OVERLAP VIOLATION"
+SELECT	PACTIVE OVERLAP	NACTIVE	OVERPACT
+SELECT	NACTIVE	OVERLAP PACTIVE	OVERNACT
+NOT	PACTIVE OVERPACT NOTOVERPACT
+NOT	NACTIVE	OVERNACT NOTOVERNACT
+EXT	NOTOVERNACT NOTOVERPACT LT 4	"RULE 2.5.2:SPACE(NACTIVE,PACTIVE) < 4"
+;###############################################################################
+; THICK ACTIVE (LAMBDA BASE)
+;###############################################################################
+WIDTH   THK_ACTIVE              LT 4    "RULE 24.1: WIDTH(THICK ACTIVE) < 4"
+EXT     THK_ACTIVE              LT 4    "RULE 24.2: SPACE(THICK ACTIVE) < 4"
+ENC     ACTIVE      THK_ACTIVE  LT 4	"RULE 24.3: ACTIVE OVERLAP < 4"
+SELECT  THK_ACTIVE ENCLOSE ACTIVE ENCTHK
+EXT     THK_ACTIVE  ACTIVE      LT 4    "RULE 24.4. SPACE(THICK ACTIVE, ACTIVE) < 4"
+AND     THK_ACTIVE         ACTIVE THKACT
+AND     THKACT             POLY   THKGATE
+WIDTH   THKGATE                 LT 3    "RULE 24.5. WIDTH(THICK ACTIVE GATE POLY) < 3"
+NOT     THK_ACTIVE         ENCTHK NONTHK
+ERROR   NONTHK                          "RULE 24.6. NOT ENCLOSE ACTIVE"
+;###############################################################################
+; POLY(LAMBDA BASE)
+;###############################################################################
+WIDTH		POLY LT 2		"RULE 3.1:WIDTH(POLY) < 2"
+EXT		POLY LT 3		"RULE 3.2:SPACE(POLY) < 3"
+SELECT		POLY   CUT ACTIVE  POLYACT
+AND 		ACTIVE	   POLYACT ACTPACT
+ENC[T] ACTPACT ACTIVE LT 0.001 &
+ENC[T] ACTPACT POLYACT LT 2 "RULE 3.3:MIN GATE POLY EXTENSION OVER ACTIVE < 2"
+SELECT          ACTIVE CUT POLY ACTPOLY
+AND POLY ACTPOLY POLYAPOLY
+ENC[T] POLYAPOLY POLY LT 0.001 &
+ENC[T] POLYAPOLY ACTPOLY LT 3 	"RULE 3.4:MIN ACTIVE EXTENSION OVER GATE POLY < 3"
+OR		POLY ACTIVE   POLACT
+EXT[H]	POLACT LT 1 		"RULE 3.5:MIN SPACE BETWEEN ACTIVE AND ROUTING POLY < 1"
+;###############################################################################
+; POLY2(LAMBDA BASE) FOR CAPACITOR
+;###############################################################################
+WIDTH		POLY2 LT 7		"RULE 11.1:WIDTH(POLY2) < 7"
+EXT		POLY2 LT 3		"RULE 11.2:SPACE(POLY2) < 3"
+
+ENC		POLY2   POLY      LT 5  "RULE 11.3:MINIMUM OVERLAP BY POLY < 5"
+EXT		POLY2   NWELL     LT 2  "RULE 11.4:SPACE(POLY2,NWELL) < 2"
+EXT		POLY2   ACTIVE    LT 2  "RULE 11.4:SPACE(POLY2,ACTIVE) < 2" 
+EXT		POLY2   CONTACT   LT 6  "RULE 11.5:SPACE(POLY2,CONTACT) < 6"
+SELECT	NOT	METAL1 CUT POLY2 NOTMET1P2
+EXT		POLY2   NOTMET1P2 LT 2  "RULE 11.6:MIN SPACING TO METAL < 2"
+;###############################################################################
+; SELECT(LAMBDA BASE)
+;###############################################################################
+ENC[O] ACTIVE POLY LT 0.001 &
+EXT		ALLSELECT POLY LT 3	"RULE 4.1:MIN SELECT SPACING TO CHANNEL < 3"
+ENC		ACTIVE PPLUS  LT 2	"RULE 4.2.1:MINIMUM OVERLAP BY PPLUS < 2"
+ENC		ACTIVE NPLUS  LT 2	"RULE 4.2.2:MINIMUM OVERLAP BY NPLUS < 2"
+ENC		CONTACT PPLUS LT 1	"RULE 4.3.1:MINIMUM OVERLAP BY PPLUS < 1"
+ENC		CONTACT NPLUS LT 1	"RULE 4.3.2:MINIMUM OVERLAP BY NPLUS < 1"
+WIDTH		PPLUS         LT 2	"RULE 4.4.1:MIN P+ SELECT WIDTH < 2"
+WIDTH		NPLUS         LT 2	"RULE 4.4.2:MIN N+ SELECT WIDTH < 2"
+EXT		PPLUS         LT 2	"RULE 4.4.3:MIN P+ SELECT SPACE < 2"
+EXT		NPLUS         LT 2	"RULE 4.4.4:MIN N+ SELECT SPACE < 2"
+AND	NPLUS PPLUS NPPLUS
+ERROR		NPPLUS			"RULE 4.4.5:NO OVERLAP VIOLATION"
+SELECT	NPLUS    OVERLAP PPLUS    OVERNPLUS
+SELECT	PPLUS    OVERLAP NPLUS    OVERPPLUS
+NOT	NPLUS    OVERNPLUS	  NOTOVERNPLUS
+NOT	PPLUS    OVERPPLUS        NOTOVERPPLUS
+EXT	NOTOVERNPLUS NOTOVERPPLUS LT 2 "RULE 4.4.6:MIN SPACE(BETWEEN N+ AND P+ SELECT) < 2"
+;###############################################################################
+; SIMPLE CONTACT TO POLY(LAMBDA BASE)
+;###############################################################################
+LENGTH		CONTACT NE 2		"RULE 5.1.1:EXACT CONTACT SIZE != 2"	
+AREA		CONTACT NE 0.8		"RULE 5.1.2:EXACT CONTACT AREA(UM2) != 0.8"	
+ENC		CONTACT POLY  LT 1.5 	"RULE 5.2:MINIMUM OVERLAP BY POLY < 1.5"
+EXT		CONTACT LT 3		"RULE 5.3:SPACE(CONTACT) < 3"
+EXT		CONTACT PGATE LT 2	"RULE 5.4.1:SPACE(CONTACT) < 2"
+EXT		CONTACT NGATE LT 2	"RULE 5.4.2:SPACE(CONTACT) < 2"
+;###############################################################################
+; SIMPLE CONTACT TO ACTIVE(LAMBDA BASE)
+;###############################################################################
+ENC		CONTACT ACTIVE LT 1.5 	"RULE 6.2:MINIMUM OVERLAP BY ACTIVE  < 1.5"
+;###############################################################################
+; CONTACT TO POLY2(LAMBDA BASE)
+;###############################################################################
+AND     CONTACT   POLY2     POLY2CONT
+AND     POLY      POLY2     POLYCAP
+AND     POLY2CONT POLYCAP   PCAPCONT
+NOT     POLY2CONT PCAPCONT  NPCAPCONT
+ENC             PCAPCONT  POLY2  LT 3   "RULE 13.3:MINIMUM OVERLAP BY POLY2 < 3"
+ENC             NPCAPCONT POLY2  LT 2   "RULE 13.4:MINIMUM OVERLAP BY POLY2 < 2"
+EXT             POLY2CONT POLY   LT 3   "RULE 13.5:SPACE(POLY2 CONTACT,POLY) < 3"
+EXT             POLY2CONT ACTIVE LT 3   "RULE 13.5:SPACE(POLY2 CONTACT,ACTIVE) < 3"
+;###############################################################################
+; METAL1(LAMBDA BASE)
+;###############################################################################
+WIDTH		METAL1         LT 3	"RULE 7.1:WIDTH(METAL1) < 3"
+EXT		METAL1         LT 3	"RULE 7.2:SPACE(METAL1) < 3"
+ENC		CONTACT METAL1 LT 1	"RULE 7.3:MINIMUM OVERLAP BY METAL1 < 1"
+;###############################################################################
+; VIA(LAMBDA BASE)
+;###############################################################################
+LENGTH		VIA         NE 2	"RULE 8.1.1:EXACT VIA SIZE != 2"	
+AREA		VIA         NE 0.8	"RULE 8.1.4:EXACT VIA AREA(UM2) != 0.8"
+
+EXT		VIA         LT 3	"RULE 8.2:MIN VIA SPACE < 3"
+ENC		VIA METAL1  LT 1	"RULE 8.3:MINIMUM OVERLAP BY METAL1 < 1"
+EXT		VIA CONTACT LT 2	"RULE 8.4:MIN SPACE(VIA,CONTACT) < 2"
+EXT		VIA POLY    LT 2	"RULE 8.5.1:MIN SPACE(VIA,POLY) < 2"
+EXT		VIA ACTIVE  LT 2	"RULE 8.5.2:MIN SPACE(VIA,ACTIVE) < 2"
+;###############################################################################
+; METAL2(LAMBDA BASE)
+;###############################################################################
+WIDTH		METAL2     LT 3		"RULE 9.1:MIN WIDTH(METAL2) < 3"
+EXT		METAL2     LT 3		"RULE 9.2:MIN SPACE(METAL2) < 3"
+ENC		VIA METAL2 LT 1		"RULE 9.3:MINIMUM OVERLAP BY METAL2 < 1"
+;###############################################################################
+; VIA2(LAMBDA BASE)
+;###############################################################################
+LENGTH		VIA2        NE 2	"RULE 14.1.1:EXACT VIA2 SIZE != 2"	
+AREA		VIA2        NE 0.8	"RULE 14.1.3:EXACT VIA2 AREA(UM2) != 0.8"
+EXT		VIA2        LT 3	"RULE 14.2:MIN VIA2 SPACE < 3"
+ENC		VIA2 METAL2 LT 1	"RULE 14.3:MINIMUM OVERLAP BY METAL2 < 1"
+EXT		VIA2 VIA    LT 2	"RULE 14.4:MIN SPACE(VIA2,VIA)<2"
+;###############################################################################
+; METAL3(LAMBDA BASE)
+;###############################################################################
+WIDTH		METAL3      LT 3	"RULE 15.1:MIN WIDTH(METAL3) < 3"
+EXT		METAL3      LT 3	"RULE 15.2:MIN SPACE(METAL3) < 3"
+ENC		VIA2 METAL3 LT 1	"RULE 15.3:MINIMUM OVERLAP BY METAL3 < 1" 
+;###############################################################################
+; VIA3(LAMBDA BASE)
+;###############################################################################
+LENGTH		VIA3        NE 2	"RULE 21.1.1:EXACT VIA3 SIZE != 2"	
+AREA		VIA3        NE 0.8	"RULE 21.1.3:EXACT VIA3 AREA(UM2) != 0.8"
+EXT		VIA3        LT 3	"RULE 21.2:MIN VIA3 SPACE < 3"
+ENC		VIA3 METAL3 LT 1	"RULE 21.3:MINIMUM OVERLAP BY METAL3 < 1"
+;###############################################################################
+; METAL4(LAMBDA BASE)
+;###############################################################################
+WIDTH		METAL4      LT 6	"RULE 22.1:MIN WIDTH(METAL4) < 6"
+EXT		METAL4      LT 6	"RULE 22.2:MIN SPACE(METAL4) < 6"
+ENC		VIA3 METAL4 LT 2	"RULE 22.3:MINIMUM OVERLAP BY METAL4 < 2"
+;###############################################################################
+; OVERGLASS(MICRON BASE)
+; TOP METAL : METAL2
+;###############################################################################
+SELECT	GLASS	ENCLOSE PROBE	BPAD
+NOT	GLASS	        BPAD	PPAD
+SELECT	METAL2	ENCLOSE	GLASS	PADMETAL
+WIDTH		BPAD            LT 300	"RULE 10.1:WIDTH(PAD) < 300(60UM)"
+WIDTH		PPAD            LT 100	"RULE 10.2:WIDTH(PROBE PAD) < 100(20UM)"
+ENC		GLASS PADMETAL  LT 30	"RULE 10.3:MINIMUM OVERLAP BY PAD METAL < 30(6UM)"
+EXT[N]		PADMETAL METAL2 LT 150	"RULE 10.4:MIN SPACE(PAD-METAL,METAL4) < 150(30UM)"
+EXT		PADMETAL ACTIVE LT 75	"RULE 10.5.1:MIN SPACE(PAD-METAL,ACTIVE) < 75(15UM)"
+EXT		PADMETAL POLY   LT 75	"RULE 10.5.2:MIN SPACE(PAD-METAL,POLY) < 75(15UM)"
+EXT		PADMETAL POLY2  LT 75	"RULE 10.5.3:MIN SPACE(PAD-METAL,POLY2) < 75(15UM)"
+*END
+
+**************************************************************
+                      COMMAND SEQUENCE
+**************************************************************
+>> GENERATE TEXT FILE
+   NWELL               NWELL               
+   ACTIVE              ACTIVE              
+   THK_ACTIVE          THK_ACTIVE          
+   POLY                POLY                
+   NPLUS               NPLUS               
+   PPLUS               PPLUS               
+   POLY2               POLY2               
+   CONTACT             CONTACT             
+   VIA                 VIA                 
+   METAL1              METAL1              
+   METAL2              METAL2              
+   VIA2                VIA2                
+   METAL3              METAL3              
+   VIA3                VIA3                
+   METAL4              METAL4              
+   GLASS               GLASS               
+   PROBE               PROBE               
+   RES_MASK            RES_MASK            
+   POLYTXT             POLYTXT             
+   ME1TXT              ME1TXT              
+   ME2TXT              ME2TXT              
+   ME3TXT              ME3TXT              
+   ME4TXT              ME4TXT              
+>> LOGICAL OPERATION
+   NOT       PBULK               NWELL               PSUB                
+   AND       ACTIVE              PPLUS               PACTIVE             
+   AND       ACTIVE              NPLUS               NACTIVE             
+   OR        PPLUS               NPLUS               ALLSELECT           
+   AND       PACTIVE             POLY                PGATE               
+   AND       NACTIVE             POLY                NGATE               
+   NOT       PACTIVE             PGATE               PSD                 
+   NOT       NACTIVE             NGATE               NSD                 
+   AND       PSUB                PSD                 PPLUG               
+   AND       NWELL               NSD                 NPLUG               
+   AND       PPLUG               CONTACT             PPCONT              
+   AND       NPLUG               CONTACT             NPCONT              
+>> IDENTIFY THE REGION ID
+   METAL4              METAL4              
+   METAL3              METAL3              
+   METAL2              METAL2              
+   METAL1              METAL1              
+   POLY2               POLY2               
+   POLY                POLY                
+   NSD                 NSD                 
+   PSD                 PSD                 
+   NWELL               NWELL               
+   PSUB                PSUB                
+>> LOGICAL OPERATION
+   AND       NSD                 NPCONT              0NPCONT             0                   0                   
+   AND       PSD                 PPCONT              0PPCONT             0                   0                   
+   AND       METAL1              CONTACT             0CONTACT            0                   0                   
+   AND       METAL2              VIA                 0VIA                0                   0                   
+   AND       METAL3              VIA2                0VIA2               0                   0                   
+   AND       METAL4              VIA3                0VIA3               0                   0                   
+   NOT       0CONTACT            POLY2               1CONTACT            0                   0                   
+   NOT       1CONTACT            POLY                2CONTACT            0                   0                   
+   NOT       2CONTACT            NSD                 3CONTACT            0                   0                   
+>> PRE_ATTACH
+   METAL4              EDTXALL             0EDTXALL            1                   
+   METAL3              0EDTXALL            1EDTXALL            0                   
+   METAL2              1EDTXALL            2EDTXALL            0                   
+   METAL1              2EDTXALL            3EDTXALL            0                   
+   POLY2               3EDTXALL            4EDTXALL            0                   
+   POLY                4EDTXALL            5EDTXALL            0                   
+   NSD                 5EDTXALL            6EDTXALL            0                   
+   PSD                 6EDTXALL            7EDTXALL            0                   
+   NWELL               7EDTXALL            8EDTXALL            0                   
+   PSUB                8EDTXALL            9EDTXALL            0                   
+   9EDTXALL            EDTXALL             
+   METAL4              METAL4              0METAL4             1                   
+   0METAL4             METAL4              
+   METAL3              METAL3              0METAL3             1                   
+   0METAL3             METAL3              
+   METAL2              METAL2              0METAL2             1                   
+   0METAL2             METAL2              
+   METAL1              METAL1              0METAL1             1                   
+   0METAL1             METAL1              
+   POLY2               POLY2               0POLY2              1                   
+   0POLY2              POLY2               
+   POLY                POLY                0POLY               1                   
+   0POLY               POLY                
+   NSD                 NSD                 0NSD                1                   
+   0NSD                NSD                 
+   PSD                 PSD                 0PSD                1                   
+   0PSD                PSD                 
+   NWELL               NWELL               0NWELL              1                   
+   0NWELL              NWELL               
+   PSUB                PSUB                0PSUB               1                   
+   0PSUB               PSUB                
+>> NODAL INFORMATION
+   CONNECT             0CONTACT            POLY2               
+   CONNECT             1CONTACT            POLY                
+   CONNECT             2CONTACT            NSD                 
+   CONNECT             3CONTACT            PSD                 
+   CONNECT             0VIA                METAL1              
+   CONNECT             0VIA2               METAL2              
+   CONNECT             0VIA3               METAL3              
+   NODE CONVERSION     METAL4              METAL4              
+   NODE CONVERSION     METAL3              METAL3              
+   NODE CONVERSION     METAL2              METAL2              
+   NODE CONVERSION     METAL1              METAL1              
+   NODE CONVERSION     POLY2               POLY2               
+   NODE CONVERSION     POLY                POLY                
+   NODE CONVERSION     NSD                 NSD                 
+   NODE CONVERSION     PSD                 PSD                 
+   NODE CONVERSION     NWELL               NWELL               
+   NODE CONVERSION     PSUB                PSUB                
+   NODE CONVERSION     0NPCONT             0NPCONT             
+   NODE CONVERSION     0PPCONT             0PPCONT             
+   NODE CONVERSION     0CONTACT            0CONTACT            
+   NODE CONVERSION     1CONTACT            1CONTACT            
+   NODE CONVERSION     2CONTACT            2CONTACT            
+   NODE CONVERSION     3CONTACT            3CONTACT            
+   NODE CONVERSION     0VIA                0VIA                
+   NODE CONVERSION     0VIA2               0VIA2               
+   NODE CONVERSION     0VIA3               0VIA3               
+   INSTANCE PIN NODE CONVERSION9PIN                
+>> POST_ATTACH
+   6PAD                9PAD                
+>> UNKNOWN
+   9PAD                9PAD                
+>> SCONNECT
+   SCONNECT  NWELL               0NPCONT             9PAD                
+   SCONNECT  PSUB                0PPCONT             9PAD                
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      NWELL               NWELL               
+   WIDTH     0                   NWELL               3                   2.4                 0                   8NWELL              NWELL               
+>> DESIGN RULE CHECKING
+   EXT       2048                NWELL               3                   3.6                 0                   8NWELL              NWELL               
+>> DESIGN RULE CHECKING
+   EXT       4096                NWELL               3                   1.2                 0                   8NWELL              NWELL               
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      ACTIVE              ACTIVE              
+   WIDTH     0                   ACTIVE              3                   0.6                 0                   8ACTIVE             ACTIVE              
+>> DESIGN RULE CHECKING
+   EXT       0                   ACTIVE              3                   0.6                 0                   8ACTIVE             ACTIVE              
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      PACTIVE             PACTIVE             
+   PROCESS DRC EDGES   PACTIVE             NWELL               6PACTIVE            6NWELL              1                   
+   ENC       0                   6PACTIVE            6NWELL              3                   1.2                 0                   8PACTIVE            8NWELL              PACTIVE             
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      NACTIVE             NACTIVE             
+   PROCESS DRC EDGES   NACTIVE             NWELL               6NACTIVE            6NWELL              1                   
+   EXT       0                   6NACTIVE            6NWELL              3                   1.2                 0                   8NACTIVE            8NWELL              NACTIVE             
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      NPLUG               NPLUG               
+   PROCESS DRC EDGES   NPLUG               NWELL               6NPLUG              6NWELL              1                   
+   ENC       0                   6NPLUG              6NWELL              3                   0.6                 0                   8NPLUG              8NWELL              NPLUG               
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      PPLUG               PPLUG               
+   PROCESS DRC EDGES   PPLUG               NWELL               6PPLUG              6NWELL              1                   
+   EXT       0                   6PPLUG              6NWELL              3                   0.6                 0                   8PPLUG              8NWELL              PPLUG               
+>> LOGICAL OPERATION
+   AND       NACTIVE             PACTIVE             NPACT               
+>> PROCESS ERROR COMMANDS
+   ERROR     NPACT               6TEMP               
+>> SELECT
+   OVERLAP   PACTIVE             NACTIVE             OVERPACT            0                   0                   0                   0                   0                   9PAD                0                   
+   OVERLAP   NACTIVE             PACTIVE             OVERNACT            0                   0                   0                   0                   0                   9PAD                0                   
+>> LOGICAL OPERATION
+   NOT       PACTIVE             OVERPACT            NOTOVERPACT         
+   NOT       NACTIVE             OVERNACT            NOTOVERNACT         
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      NOTOVERNACT         NOTOVERNACT         
+   GENERATE EDGES      NOTOVERPACT         NOTOVERPACT         
+   PROCESS DRC EDGES   NOTOVERNACT         NOTOVERPACT         6NOTOVERNACT        6NOTOVERPACT        1                   
+   EXT       0                   6NOTOVERNACT        6NOTOVERPACT        3                   0.8                 0                   8NOTOVERNACT        8NOTOVERPACT        NOTOVERNACT         
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      THK_ACTIVE          THK_ACTIVE          
+   WIDTH     0                   THK_ACTIVE          3                   0.8                 0                   8THK_ACTIVE         THK_ACTIVE          
+>> DESIGN RULE CHECKING
+   EXT       0                   THK_ACTIVE          3                   0.8                 0                   8THK_ACTIVE         THK_ACTIVE          
+>> DESIGN RULE CHECKING
+   PROCESS DRC EDGES   ACTIVE              THK_ACTIVE          6ACTIVE             6THK_ACTIVE         1                   
+   ENC       0                   6ACTIVE             6THK_ACTIVE         3                   0.8                 0                   8ACTIVE             8THK_ACTIVE         ACTIVE              
+>> SELECT
+   ENCLOSE   THK_ACTIVE          ACTIVE              ENCTHK              0                   0                   0                   0                   0                   9PAD                0                   
+>> DESIGN RULE CHECKING
+   PROCESS DRC EDGES   THK_ACTIVE          ACTIVE              6THK_ACTIVE         6ACTIVE             1                   
+   EXT       0                   6THK_ACTIVE         6ACTIVE             3                   0.8                 0                   8THK_ACTIVE         8ACTIVE             THK_ACTIVE          
+>> LOGICAL OPERATION
+   AND       THK_ACTIVE          ACTIVE              THKACT              
+   AND       THKACT              POLY                THKGATE             
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      THKGATE             THKGATE             
+   WIDTH     0                   THKGATE             3                   0.6                 0                   8THKGATE            THKGATE             
+>> LOGICAL OPERATION
+   NOT       THK_ACTIVE          ENCTHK              NONTHK              
+>> PROCESS ERROR COMMANDS
+   ERROR     NONTHK              6TEMP               
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      POLY                POLY                
+   WIDTH     0                   POLY                3                   0.4                 0                   8POLY               POLY                
+>> DESIGN RULE CHECKING
+   EXT       0                   POLY                3                   0.6                 0                   8POLY               POLY                
+>> SELECT
+   CUT       POLY                ACTIVE              POLYACT             0                   0                   0                   0                   0                   9PAD                0                   
+>> LOGICAL OPERATION
+   AND       ACTIVE              POLYACT             ACTPACT             
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      ACTPACT             ACTPACT             
+   PROCESS DRC EDGES   ACTPACT             ACTIVE              6ACTPACT            6ACTIVE             1                   
+   ENC       524288              6ACTPACT            6ACTIVE             3                   0                   0                   8ACTPACT            8ACTIVE             ACTPACT             
+   GENERATE EDGES      POLYACT             POLYACT             
+   PROCESS DRC EDGES   8ACTPACT            POLYACT             8ACTPACT            6POLYACT            2                   
+   ENC       524288              8ACTPACT            6POLYACT            3                   0.4                 0                   8ACTPACT            8POLYACT            ACTPACT             
+>> SELECT
+   CUT       ACTIVE              POLY                ACTPOLY             0                   0                   0                   0                   0                   9PAD                0                   
+>> LOGICAL OPERATION
+   AND       POLY                ACTPOLY             POLYAPOLY           
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      POLYAPOLY           POLYAPOLY           
+   PROCESS DRC EDGES   POLYAPOLY           POLY                6POLYAPOLY          6POLY               1                   
+   ENC       524288              6POLYAPOLY          6POLY               3                   0                   0                   8POLYAPOLY          8POLY               POLYAPOLY           
+   GENERATE EDGES      ACTPOLY             ACTPOLY             
+   PROCESS DRC EDGES   8POLYAPOLY          ACTPOLY             8POLYAPOLY          6ACTPOLY            2                   
+   ENC       524288              8POLYAPOLY          6ACTPOLY            3                   0.6                 0                   8POLYAPOLY          8ACTPOLY            POLYAPOLY           
+>> LOGICAL OPERATION
+   OR        POLY                ACTIVE              POLACT              
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      POLACT              POLACT              
+   EXT       256                 POLACT              3                   0.2                 0                   8POLACT             POLACT              
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      POLY2               POLY2               
+   WIDTH     0                   POLY2               3                   1.4                 0                   8POLY2              POLY2               
+>> DESIGN RULE CHECKING
+   EXT       0                   POLY2               3                   0.6                 0                   8POLY2              POLY2               
+>> DESIGN RULE CHECKING
+   PROCESS DRC EDGES   POLY2               POLY                6POLY2              6POLY               1                   
+   ENC       0                   6POLY2              6POLY               3                   1                   0                   8POLY2              8POLY               POLY2               
+>> DESIGN RULE CHECKING
+   PROCESS DRC EDGES   POLY2               NWELL               6POLY2              6NWELL              1                   
+   EXT       0                   6POLY2              6NWELL              3                   0.4                 0                   8POLY2              8NWELL              POLY2               
+>> DESIGN RULE CHECKING
+   PROCESS DRC EDGES   POLY2               ACTIVE              6POLY2              6ACTIVE             1                   
+   EXT       0                   6POLY2              6ACTIVE             3                   0.4                 0                   8POLY2              8ACTIVE             POLY2               
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      CONTACT             CONTACT             
+   PROCESS DRC EDGES   POLY2               CONTACT             6POLY2              6CONTACT            1                   
+   EXT       0                   6POLY2              6CONTACT            3                   1.2                 0                   8POLY2              8CONTACT            POLY2               
+>> SELECT
+   CUT       METAL1              POLY2               NOTMET1P2           0                   0                   1                   0                   0                   9PAD                0                   
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      NOTMET1P2           NOTMET1P2           
+   PROCESS DRC EDGES   POLY2               NOTMET1P2           6POLY2              6NOTMET1P2          1                   
+   EXT       0                   6POLY2              6NOTMET1P2          3                   0.4                 0                   8POLY2              8NOTMET1P2          POLY2               
+>> DESIGN RULE CHECKING
+   PROCESS DRC EDGES   ACTIVE              POLY                6ACTIVE             6POLY               1                   
+   ENC       8192                6ACTIVE             6POLY               3                   0                   0                   8ACTIVE             8POLY               ACTIVE              
+   GENERATE EDGES      ALLSELECT           ALLSELECT           
+   PROCESS DRC EDGES   ALLSELECT           8POLY               6ALLSELECT          8POLY               3                   
+   EXT       0                   6ALLSELECT          8POLY               3                   0.6                 0                   8ALLSELECT          8POLY               ALLSELECT           
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      PPLUS               PPLUS               
+   PROCESS DRC EDGES   ACTIVE              PPLUS               6ACTIVE             6PPLUS              1                   
+   ENC       0                   6ACTIVE             6PPLUS              3                   0.4                 0                   8ACTIVE             8PPLUS              ACTIVE              
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      NPLUS               NPLUS               
+   PROCESS DRC EDGES   ACTIVE              NPLUS               6ACTIVE             6NPLUS              1                   
+   ENC       0                   6ACTIVE             6NPLUS              3                   0.4                 0                   8ACTIVE             8NPLUS              ACTIVE              
+>> DESIGN RULE CHECKING
+   PROCESS DRC EDGES   CONTACT             PPLUS               6CONTACT            6PPLUS              1                   
+   ENC       0                   6CONTACT            6PPLUS              3                   0.2                 0                   8CONTACT            8PPLUS              CONTACT             
+>> DESIGN RULE CHECKING
+   PROCESS DRC EDGES   CONTACT             NPLUS               6CONTACT            6NPLUS              1                   
+   ENC       0                   6CONTACT            6NPLUS              3                   0.2                 0                   8CONTACT            8NPLUS              CONTACT             
+>> DESIGN RULE CHECKING
+   WIDTH     0                   PPLUS               3                   0.4                 0                   8PPLUS              PPLUS               
+>> DESIGN RULE CHECKING
+   WIDTH     0                   NPLUS               3                   0.4                 0                   8NPLUS              NPLUS               
+>> DESIGN RULE CHECKING
+   EXT       0                   PPLUS               3                   0.4                 0                   8PPLUS              PPLUS               
+>> DESIGN RULE CHECKING
+   EXT       0                   NPLUS               3                   0.4                 0                   8NPLUS              NPLUS               
+>> LOGICAL OPERATION
+   AND       NPLUS               PPLUS               NPPLUS              
+>> PROCESS ERROR COMMANDS
+   ERROR     NPPLUS              6TEMP               
+>> SELECT
+   OVERLAP   NPLUS               PPLUS               OVERNPLUS           0                   0                   0                   0                   0                   9PAD                0                   
+   OVERLAP   PPLUS               NPLUS               OVERPPLUS           0                   0                   0                   0                   0                   9PAD                0                   
+>> LOGICAL OPERATION
+   NOT       NPLUS               OVERNPLUS           NOTOVERNPLUS        
+   NOT       PPLUS               OVERPPLUS           NOTOVERPPLUS        
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      NOTOVERNPLUS        NOTOVERNPLUS        
+   GENERATE EDGES      NOTOVERPPLUS        NOTOVERPPLUS        
+   PROCESS DRC EDGES   NOTOVERNPLUS        NOTOVERPPLUS        6NOTOVERNPLUS       6NOTOVERPPLUS       1                   
+   EXT       0                   6NOTOVERNPLUS       6NOTOVERPPLUS       3                   0.4                 0                   8NOTOVERNPLUS       8NOTOVERPPLUS       NOTOVERNPLUS        
+>> DESIGN RULE CHECKING
+   LENGTH    0                   CONTACT             6                   0.4                 0                   8CONTACT            
+>> AREA
+   AREA      CONTACT             6TEMP               6                   0.16                0                   
+>> DESIGN RULE CHECKING
+   PROCESS DRC EDGES   CONTACT             POLY                6CONTACT            6POLY               1                   
+   ENC       0                   6CONTACT            6POLY               3                   0.3                 0                   8CONTACT            8POLY               CONTACT             
+>> DESIGN RULE CHECKING
+   EXT       0                   CONTACT             3                   0.6                 0                   8CONTACT            CONTACT             
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      PGATE               PGATE               
+   PROCESS DRC EDGES   CONTACT             PGATE               6CONTACT            6PGATE              1                   
+   EXT       0                   6CONTACT            6PGATE              3                   0.4                 0                   8CONTACT            8PGATE              CONTACT             
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      NGATE               NGATE               
+   PROCESS DRC EDGES   CONTACT             NGATE               6CONTACT            6NGATE              1                   
+   EXT       0                   6CONTACT            6NGATE              3                   0.4                 0                   8CONTACT            8NGATE              CONTACT             
+>> DESIGN RULE CHECKING
+   PROCESS DRC EDGES   CONTACT             ACTIVE              6CONTACT            6ACTIVE             1                   
+   ENC       0                   6CONTACT            6ACTIVE             3                   0.3                 0                   8CONTACT            8ACTIVE             CONTACT             
+>> LOGICAL OPERATION
+   AND       CONTACT             POLY2               POLY2CONT           
+   AND       POLY                POLY2               POLYCAP             
+   AND       POLY2CONT           POLYCAP             PCAPCONT            
+   NOT       POLY2CONT           PCAPCONT            NPCAPCONT           
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      PCAPCONT            PCAPCONT            
+   PROCESS DRC EDGES   PCAPCONT            POLY2               6PCAPCONT           6POLY2              1                   
+   ENC       0                   6PCAPCONT           6POLY2              3                   0.6                 0                   8PCAPCONT           8POLY2              PCAPCONT            
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      NPCAPCONT           NPCAPCONT           
+   PROCESS DRC EDGES   NPCAPCONT           POLY2               6NPCAPCONT          6POLY2              1                   
+   ENC       0                   6NPCAPCONT          6POLY2              3                   0.4                 0                   8NPCAPCONT          8POLY2              NPCAPCONT           
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      POLY2CONT           POLY2CONT           
+   PROCESS DRC EDGES   POLY2CONT           POLY                6POLY2CONT          6POLY               1                   
+   EXT       0                   6POLY2CONT          6POLY               3                   0.6                 0                   8POLY2CONT          8POLY               POLY2CONT           
+>> DESIGN RULE CHECKING
+   PROCESS DRC EDGES   POLY2CONT           ACTIVE              6POLY2CONT          6ACTIVE             1                   
+   EXT       0                   6POLY2CONT          6ACTIVE             3                   0.6                 0                   8POLY2CONT          8ACTIVE             POLY2CONT           
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      METAL1              METAL1              
+   WIDTH     0                   METAL1              3                   0.6                 0                   8METAL1             METAL1              
+>> DESIGN RULE CHECKING
+   EXT       0                   METAL1              3                   0.6                 0                   8METAL1             METAL1              
+>> DESIGN RULE CHECKING
+   PROCESS DRC EDGES   CONTACT             METAL1              6CONTACT            6METAL1             1                   
+   ENC       0                   6CONTACT            6METAL1             3                   0.2                 0                   8CONTACT            8METAL1             CONTACT             
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      VIA                 VIA                 
+   LENGTH    0                   VIA                 6                   0.4                 0                   8VIA                
+>> AREA
+   AREA      VIA                 6TEMP               6                   0.16                0                   
+>> DESIGN RULE CHECKING
+   EXT       0                   VIA                 3                   0.6                 0                   8VIA                VIA                 
+>> DESIGN RULE CHECKING
+   PROCESS DRC EDGES   VIA                 METAL1              6VIA                6METAL1             1                   
+   ENC       0                   6VIA                6METAL1             3                   0.2                 0                   8VIA                8METAL1             VIA                 
+>> DESIGN RULE CHECKING
+   PROCESS DRC EDGES   VIA                 CONTACT             6VIA                6CONTACT            1                   
+   EXT       0                   6VIA                6CONTACT            3                   0.4                 0                   8VIA                8CONTACT            VIA                 
+>> DESIGN RULE CHECKING
+   PROCESS DRC EDGES   VIA                 POLY                6VIA                6POLY               1                   
+   EXT       0                   6VIA                6POLY               3                   0.4                 0                   8VIA                8POLY               VIA                 
+>> DESIGN RULE CHECKING
+   PROCESS DRC EDGES   VIA                 ACTIVE              6VIA                6ACTIVE             1                   
+   EXT       0                   6VIA                6ACTIVE             3                   0.4                 0                   8VIA                8ACTIVE             VIA                 
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      METAL2              METAL2              
+   WIDTH     0                   METAL2              3                   0.6                 0                   8METAL2             METAL2              
+>> DESIGN RULE CHECKING
+   EXT       0                   METAL2              3                   0.6                 0                   8METAL2             METAL2              
+>> DESIGN RULE CHECKING
+   PROCESS DRC EDGES   VIA                 METAL2              6VIA                6METAL2             1                   
+   ENC       0                   6VIA                6METAL2             3                   0.2                 0                   8VIA                8METAL2             VIA                 
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      VIA2                VIA2                
+   LENGTH    0                   VIA2                6                   0.4                 0                   8VIA2               
+>> AREA
+   AREA      VIA2                6TEMP               6                   0.16                0                   
+>> DESIGN RULE CHECKING
+   EXT       0                   VIA2                3                   0.6                 0                   8VIA2               VIA2                
+>> DESIGN RULE CHECKING
+   PROCESS DRC EDGES   VIA2                METAL2              6VIA2               6METAL2             1                   
+   ENC       0                   6VIA2               6METAL2             3                   0.2                 0                   8VIA2               8METAL2             VIA2                
+>> DESIGN RULE CHECKING
+   PROCESS DRC EDGES   VIA2                VIA                 6VIA2               6VIA                1                   
+   EXT       0                   6VIA2               6VIA                3                   0.4                 0                   8VIA2               8VIA                VIA2                
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      METAL3              METAL3              
+   WIDTH     0                   METAL3              3                   0.6                 0                   8METAL3             METAL3              
+>> DESIGN RULE CHECKING
+   EXT       0                   METAL3              3                   0.6                 0                   8METAL3             METAL3              
+>> DESIGN RULE CHECKING
+   PROCESS DRC EDGES   VIA2                METAL3              6VIA2               6METAL3             1                   
+   ENC       0                   6VIA2               6METAL3             3                   0.2                 0                   8VIA2               8METAL3             VIA2                
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      VIA3                VIA3                
+   LENGTH    0                   VIA3                6                   0.4                 0                   8VIA3               
+>> AREA
+   AREA      VIA3                6TEMP               6                   0.16                0                   
+>> DESIGN RULE CHECKING
+   EXT       0                   VIA3                3                   0.6                 0                   8VIA3               VIA3                
+>> DESIGN RULE CHECKING
+   PROCESS DRC EDGES   VIA3                METAL3              6VIA3               6METAL3             1                   
+   ENC       0                   6VIA3               6METAL3             3                   0.2                 0                   8VIA3               8METAL3             VIA3                
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      METAL4              METAL4              
+   WIDTH     0                   METAL4              3                   1.2                 0                   8METAL4             METAL4              
+>> DESIGN RULE CHECKING
+   EXT       0                   METAL4              3                   1.2                 0                   8METAL4             METAL4              
+>> DESIGN RULE CHECKING
+   PROCESS DRC EDGES   VIA3                METAL4              6VIA3               6METAL4             1                   
+   ENC       0                   6VIA3               6METAL4             3                   0.4                 0                   8VIA3               8METAL4             VIA3                
+>> SELECT
+   ENCLOSE   GLASS               PROBE               BPAD                0                   0                   0                   0                   0                   9PAD                0                   
+>> LOGICAL OPERATION
+   NOT       GLASS               BPAD                PPAD                
+>> SELECT
+   ENCLOSE   METAL2              GLASS               PADMETAL            0                   0                   0                   0                   0                   9PAD                0                   
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      BPAD                BPAD                
+   WIDTH     0                   BPAD                3                   60                  0                   8BPAD               BPAD                
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      PPAD                PPAD                
+   WIDTH     0                   PPAD                3                   20                  0                   8PPAD               PPAD                
+>> DESIGN RULE CHECKING
+   GENERATE EDGES      GLASS               GLASS               
+   GENERATE EDGES      PADMETAL            PADMETAL            
+   PROCESS DRC EDGES   GLASS               PADMETAL            6GLASS              6PADMETAL           1                   
+   ENC       0                   6GLASS              6PADMETAL           3                   6                   0                   8GLASS              8PADMETAL           GLASS               
+>> DESIGN RULE CHECKING
+   PROCESS DRC EDGES   PADMETAL            METAL2              6PADMETAL           6METAL2             1                   
+   EXT       2048                6PADMETAL           6METAL2             3                   30                  0                   8PADMETAL           8METAL2             PADMETAL            
+>> DESIGN RULE CHECKING
+   PROCESS DRC EDGES   PADMETAL            ACTIVE              6PADMETAL           6ACTIVE             1                   
+   EXT       0                   6PADMETAL           6ACTIVE             3                   15                  0                   8PADMETAL           8ACTIVE             PADMETAL            
+>> DESIGN RULE CHECKING
+   PROCESS DRC EDGES   PADMETAL            POLY                6PADMETAL           6POLY               1                   
+   EXT       0                   6PADMETAL           6POLY               3                   15                  0                   8PADMETAL           8POLY               PADMETAL            
+>> DESIGN RULE CHECKING
+   PROCESS DRC EDGES   PADMETAL            POLY2               6PADMETAL           6POLY2              1                   
+   EXT       0                   6PADMETAL           6POLY2              3                   15                  0                   8PADMETAL           8POLY2              PADMETAL            
+>> CONNECT LAYER SEQUENCE
+   METAL4              
+   METAL3              
+   METAL2              
+   METAL1              
+   POLY2               
+   POLY                
+   NSD                 
+   PSD                 
+   NWELL               
+   PSUB                
+>> MASTER LAYER ABOUT EACH CONTACT LAYER
+   *CONTACT              MASTER               CONNECT             
+    NPCONT               NSD                  NWELL               
+    PPCONT               PSD                  PSUB                
+    CONTACT              METAL1               POLY2               
+    CONTACT              METAL1               POLY                
+    CONTACT              METAL1               NSD                 
+    CONTACT              METAL1               PSD                 
+    VIA                  METAL2               METAL1              
+    VIA2                 METAL3               METAL2              
+    VIA3                 METAL4               METAL3              
+>> ELEMENT    DEVICE               TERM1                TERM2                TERM3                TERM4               
+
+**************************************************************
+                      DATA IN
+**************************************************************
+>> CELL LIST : CELL NAME            DIRECTORY NAME       REMOVED             
+   In 'shpark.prj' PROJECT
+                 INV                  inv._00              NO                  
+                 NAND                 nand._00             NO                  
+                 BUFFER               buffer._00           NO                  
+                 CMOS_LATCH           CMOS_latch._00       NO                  
+                 LATCHVER2            latchver2._00        NO                  
+                 DFF                  DFF._00              NO                  
+                 DFF2                 DFF2._00             NO                  
+                 DIV5N6               div5n6._00           NO                  
+>> READ-IN 'DIV5N6' cell
+   # of polygon 132       
+   # of path    0         
+   # of text    23        
+   # of sref    5         
+   # of aref    0         
+   # of circle/ellipse/arcdonut    0         
+   # of ellipse    0         
+>> READ-IN 'BUFFER' cell
+   # of polygon 35        
+   # of path    0         
+   # of text    4         
+   # of sref    1         
+   # of aref    0         
+   # of circle/ellipse/arcdonut    0         
+   # of ellipse    0         
+>> READ-IN 'NAND' cell
+   # of polygon 39        
+   # of path    0         
+   # of text    5         
+   # of sref    0         
+   # of aref    0         
+   # of circle/ellipse/arcdonut    0         
+   # of ellipse    0         
+>> READ-IN 'DFF2' cell
+   # of polygon 43        
+   # of path    0         
+   # of text    12        
+   # of sref    3         
+   # of aref    0         
+   # of circle/ellipse/arcdonut    0         
+   # of ellipse    0         
+>> READ-IN 'INV' cell
+   # of polygon 28        
+   # of path    0         
+   # of text    4         
+   # of sref    0         
+   # of aref    0         
+   # of circle/ellipse/arcdonut    0         
+   # of ellipse    0         
+>> READ-IN 'CMOS_LATCH' cell
+   # of polygon 39        
+   # of path    0         
+   # of text    9         
+   # of sref    2         
+   # of aref    0         
+   # of circle/ellipse/arcdonut    0         
+   # of ellipse    0         
+
+**************************************************************
+                      OPEN THE VERIFICATION ERROR FILE
+**************************************************************
+   OPEN THE 'DRC' FILE TO RECORD THE VERIFICATION ERRORS
+
+**************************************************************
+                      OPEN THE VERIFICATION REPORT FILE
+**************************************************************
+   OPEN THE 'DRC' FILE TO RECORD THE VERIFICATION REPORT
+
+**************************************************************
+                      CHECKING THE GEOMETRIES
+**************************************************************
+
+**************************************************************
+                      EXPAND AND GENERATE THE EDGE FILES
+**************************************************************
+>> GENERATE EDGE FILE FOR 'NWELL' LAYER
+   '36' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'ACTIVE' LAYER
+   '214' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'THK_ACTIVE' LAYER
+   '0' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'POLY' LAYER
+   '108' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'NPLUS' LAYER
+   '100' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'PPLUS' LAYER
+   '100' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'POLY2' LAYER
+   '0' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'CONTACT' LAYER
+   '570' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'VIA' LAYER
+   '160' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'METAL1' LAYER
+   '342' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'METAL2' LAYER
+   '137' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'VIA2' LAYER
+   '34' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'METAL3' LAYER
+   '31' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'VIA3' LAYER
+   '0' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'METAL4' LAYER
+   '0' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'GLASS' LAYER
+   '0' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'PROBE' LAYER
+   '0' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'RES_MASK' LAYER
+   '0' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'POLYTXT' LAYER
+   '0' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'ME1TXT' LAYER
+   '0' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'ME2TXT' LAYER
+   '0' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'ME3TXT' LAYER
+   '0' EDGES GENERATED
+>> GENERATE EDGE FILE FOR 'ME4TXT' LAYER
+   '0' EDGES GENERATED
+
+**************************************************************
+                      GENERATE COMPOSITE/HCELL TEXT
+**************************************************************
+
+**************************************************************
+                      ID LABEL
+**************************************************************
+>> IDENTIFY THE 'NWELL' LAYER TEXT TO 'NWELL' LAYER
+>> IDENTIFY THE 'ACTIVE' LAYER TEXT TO 'ACTIVE' LAYER
+>> IDENTIFY THE 'THK_ACTIVE' LAYER TEXT TO 'THK_ACTIVE' LAYER
+>> IDENTIFY THE 'POLY' LAYER TEXT TO 'POLY' LAYER
+>> IDENTIFY THE 'NPLUS' LAYER TEXT TO 'NPLUS' LAYER
+>> IDENTIFY THE 'PPLUS' LAYER TEXT TO 'PPLUS' LAYER
+>> IDENTIFY THE 'POLY2' LAYER TEXT TO 'POLY2' LAYER
+>> IDENTIFY THE 'CONTACT' LAYER TEXT TO 'CONTACT' LAYER
+>> IDENTIFY THE 'VIA' LAYER TEXT TO 'VIA' LAYER
+>> IDENTIFY THE 'METAL1' LAYER TEXT TO 'METAL1' LAYER
+>> IDENTIFY THE 'METAL2' LAYER TEXT TO 'METAL2' LAYER
+>> IDENTIFY THE 'VIA2' LAYER TEXT TO 'VIA2' LAYER
+>> IDENTIFY THE 'METAL3' LAYER TEXT TO 'METAL3' LAYER
+>> IDENTIFY THE 'VIA3' LAYER TEXT TO 'VIA3' LAYER
+>> IDENTIFY THE 'METAL4' LAYER TEXT TO 'METAL4' LAYER
+>> IDENTIFY THE 'GLASS' LAYER TEXT TO 'GLASS' LAYER
+>> IDENTIFY THE 'PROBE' LAYER TEXT TO 'PROBE' LAYER
+>> IDENTIFY THE 'RES_MASK' LAYER TEXT TO 'RES_MASK' LAYER
+>> IDENTIFY THE 'POLYTXT' LAYER TEXT TO 'POLYTXT' LAYER
+>> IDENTIFY THE 'ME1TXT' LAYER TEXT TO 'ME1TXT' LAYER
+>> IDENTIFY THE 'ME2TXT' LAYER TEXT TO 'ME2TXT' LAYER
+>> IDENTIFY THE 'ME3TXT' LAYER TEXT TO 'ME3TXT' LAYER
+>> IDENTIFY THE 'ME4TXT' LAYER TEXT TO 'ME4TXT' LAYER
+
+**************************************************************
+                      BOOLEAN OPERATION
+**************************************************************
+>> GENERATE 'PSUB' FROM 'PBULK' NOT 'NWELL' ...
+   '2' AND '36' TO '38' EDGES
+>> GENERATE 'PACTIVE' FROM 'ACTIVE' AND 'PPLUS' ...
+   '214' AND '100' TO '114' EDGES
+>> GENERATE 'NACTIVE' FROM 'ACTIVE' AND 'NPLUS' ...
+   '214' AND '100' TO '100' EDGES
+>> GENERATE 'ALLSELECT' FROM 'PPLUS' OR 'NPLUS' ...
+   '100' AND '100' TO '100' EDGES
+>> GENERATE 'PGATE' FROM 'PACTIVE' AND 'POLY' ...
+   '114' AND '108' TO '54' EDGES
+>> GENERATE 'NGATE' FROM 'NACTIVE' AND 'POLY' ...
+   '100' AND '108' TO '54' EDGES
+>> GENERATE 'PSD' FROM 'PACTIVE' NOT 'PGATE' ...
+   '114' AND '54' TO '168' EDGES
+>> GENERATE 'NSD' FROM 'NACTIVE' NOT 'NGATE' ...
+   '100' AND '54' TO '154' EDGES
+>> GENERATE 'PPLUG' FROM 'PSUB' AND 'PSD' ...
+   '38' AND '168' TO '64' EDGES
+>> GENERATE 'NPLUG' FROM 'NWELL' AND 'NSD' ...
+   '36' AND '154' TO '50' EDGES
+>> GENERATE 'PPCONT' FROM 'PPLUG' AND 'CONTACT' ...
+   '64' AND '570' TO '100' EDGES
+>> GENERATE 'NPCONT' FROM 'NPLUG' AND 'CONTACT' ...
+   '50' AND '570' TO '104' EDGES
+
+**************************************************************
+                      REGION
+**************************************************************
+>> LAYER 'METAL4' IS IDENTIFIED FROM 2 to 1 REGIONS
+>> LAYER 'METAL3' IS IDENTIFIED FROM 2 to 9 REGIONS
+>> LAYER 'METAL2' IS IDENTIFIED FROM 10 to 55 REGIONS
+>> LAYER 'METAL1' IS IDENTIFIED FROM 56 to 142 REGIONS
+>> LAYER 'POLY2' IS IDENTIFIED FROM 143 to 142 REGIONS
+>> LAYER 'POLY' IS IDENTIFIED FROM 143 to 169 REGIONS
+>> LAYER 'NSD' IS IDENTIFIED FROM 170 to 246 REGIONS
+>> LAYER 'PSD' IS IDENTIFIED FROM 247 to 330 REGIONS
+>> LAYER 'NWELL' IS IDENTIFIED FROM 331 to 348 REGIONS
+>> LAYER 'PSUB' IS IDENTIFIED FROM 349 to 349 REGIONS
+
+**************************************************************
+                      BOOLEAN OPERATION
+**************************************************************
+>> GENERATE '0NPCONT' FROM 'NSD' AND 'NPCONT' ...
+   '154' AND '104' TO '104' EDGES
+>> GENERATE '0PPCONT' FROM 'PSD' AND 'PPCONT' ...
+   '168' AND '100' TO '100' EDGES
+>> GENERATE '0CONTACT' FROM 'METAL1' AND 'CONTACT' ...
+   '342' AND '570' TO '570' EDGES
+>> GENERATE '0VIA' FROM 'METAL2' AND 'VIA' ...
+   '137' AND '160' TO '156' EDGES
+>> GENERATE '0VIA2' FROM 'METAL3' AND 'VIA2' ...
+   '31' AND '34' TO '32' EDGES
+>> GENERATE '0VIA3' FROM 'METAL4' AND 'VIA3' ...
+   '0' AND '0' TO '0' EDGES
+>> GENERATE '1CONTACT' FROM '0CONTACT' NOT 'POLY2' ...
+   '570' AND '0' TO '570' EDGES
+>> GENERATE '2CONTACT' FROM '1CONTACT' NOT 'POLY' ...
+   '570' AND '108' TO '516' EDGES
+>> GENERATE '3CONTACT' FROM '2CONTACT' NOT 'NSD' ...
+   '516' AND '154' TO '308' EDGES
+
+**************************************************************
+                      PRE ATTACH
+**************************************************************
+>> ATTACH 'EDTXALL' TEXT LAYER TO 'METAL4' LAYER
+   UNATTACHED 'EDTXALL' TEXT LAYER TO '0EDTXALL' LAYER
+>> ATTACH '0EDTXALL' TEXT LAYER TO 'METAL3' LAYER
+   UNATTACHED '0EDTXALL' TEXT LAYER TO '1EDTXALL' LAYER
+>> ATTACH '1EDTXALL' TEXT LAYER TO 'METAL2' LAYER
+   UNATTACHED '1EDTXALL' TEXT LAYER TO '2EDTXALL' LAYER
+>> ATTACH '2EDTXALL' TEXT LAYER TO 'METAL1' LAYER
+   UNATTACHED '2EDTXALL' TEXT LAYER TO '3EDTXALL' LAYER
+>> ATTACH '3EDTXALL' TEXT LAYER TO 'POLY2' LAYER
+   UNATTACHED '3EDTXALL' TEXT LAYER TO '4EDTXALL' LAYER
+>> ATTACH '4EDTXALL' TEXT LAYER TO 'POLY' LAYER
+   UNATTACHED '4EDTXALL' TEXT LAYER TO '5EDTXALL' LAYER
+>> ATTACH '5EDTXALL' TEXT LAYER TO 'NSD' LAYER
+   UNATTACHED '5EDTXALL' TEXT LAYER TO '6EDTXALL' LAYER
+>> ATTACH '6EDTXALL' TEXT LAYER TO 'PSD' LAYER
+   UNATTACHED '6EDTXALL' TEXT LAYER TO '7EDTXALL' LAYER
+>> ATTACH '7EDTXALL' TEXT LAYER TO 'NWELL' LAYER
+   UNATTACHED '7EDTXALL' TEXT LAYER TO '8EDTXALL' LAYER
+>> ATTACH '8EDTXALL' TEXT LAYER TO 'PSUB' LAYER
+   UNATTACHED '8EDTXALL' TEXT LAYER TO '9EDTXALL' LAYER
+>> DISPLAY UNATTACHED TEXT OF 'EDTXALL' TEXT LAYER
+>> ATTACH 'METAL4' TEXT LAYER TO 'METAL4' LAYER
+   UNATTACHED 'METAL4' TEXT LAYER TO '0METAL4' LAYER
+>> DISPLAY UNATTACHED TEXT OF 'METAL4' TEXT LAYER
+>> ATTACH 'METAL3' TEXT LAYER TO 'METAL3' LAYER
+   UNATTACHED 'METAL3' TEXT LAYER TO '0METAL3' LAYER
+>> DISPLAY UNATTACHED TEXT OF 'METAL3' TEXT LAYER
+>> ATTACH 'METAL2' TEXT LAYER TO 'METAL2' LAYER
+   UNATTACHED 'METAL2' TEXT LAYER TO '0METAL2' LAYER
+>> DISPLAY UNATTACHED TEXT OF 'METAL2' TEXT LAYER
+>> ATTACH 'METAL1' TEXT LAYER TO 'METAL1' LAYER
+   UNATTACHED 'METAL1' TEXT LAYER TO '0METAL1' LAYER
+>> DISPLAY UNATTACHED TEXT OF 'METAL1' TEXT LAYER
+>> ATTACH 'POLY2' TEXT LAYER TO 'POLY2' LAYER
+   UNATTACHED 'POLY2' TEXT LAYER TO '0POLY2' LAYER
+>> DISPLAY UNATTACHED TEXT OF 'POLY2' TEXT LAYER
+>> ATTACH 'POLY' TEXT LAYER TO 'POLY' LAYER
+   UNATTACHED 'POLY' TEXT LAYER TO '0POLY' LAYER
+>> DISPLAY UNATTACHED TEXT OF 'POLY' TEXT LAYER
+>> ATTACH 'NSD' TEXT LAYER TO 'NSD' LAYER
+   UNATTACHED 'NSD' TEXT LAYER TO '0NSD' LAYER
+>> DISPLAY UNATTACHED TEXT OF 'NSD' TEXT LAYER
+>> ATTACH 'PSD' TEXT LAYER TO 'PSD' LAYER
+   UNATTACHED 'PSD' TEXT LAYER TO '0PSD' LAYER
+>> DISPLAY UNATTACHED TEXT OF 'PSD' TEXT LAYER
+>> ATTACH 'NWELL' TEXT LAYER TO 'NWELL' LAYER
+   UNATTACHED 'NWELL' TEXT LAYER TO '0NWELL' LAYER
+>> DISPLAY UNATTACHED TEXT OF 'NWELL' TEXT LAYER
+>> ATTACH 'PSUB' TEXT LAYER TO 'PSUB' LAYER
+   UNATTACHED 'PSUB' TEXT LAYER TO '0PSUB' LAYER
+>> DISPLAY UNATTACHED TEXT OF 'PSUB' TEXT LAYER
+>> GENERATE 6PAD.TXT FILE ...
+
+**************************************************************
+                      NODAL
+**************************************************************
+>> CREATE THE NODAL RELATION TABLE
+>> CONNECT '0CONTACT' LAYER TO 'POLY2' LAYER
+>> CONNECT '1CONTACT' LAYER TO 'POLY' LAYER
+>> CONNECT '2CONTACT' LAYER TO 'NSD' LAYER
+>> CONNECT '3CONTACT' LAYER TO 'PSD' LAYER
+>> CONNECT '0VIA' LAYER TO 'METAL1' LAYER
+>> CONNECT '0VIA2' LAYER TO 'METAL2' LAYER
+>> CONNECT '0VIA3' LAYER TO 'METAL3' LAYER
+>> COMPRESS THE NODE INFORMATION TO CONSTRUCT THE COMPACT NET
+   70 NODES ARE IDENTIFIED FROM 350 REGIONS 
+>> NODE CONVERSION FROM 'METAL4' TO 'METAL4' LAYER
+>> NODE CONVERSION FROM 'METAL3' TO 'METAL3' LAYER
+>> NODE CONVERSION FROM 'METAL2' TO 'METAL2' LAYER
+>> NODE CONVERSION FROM 'METAL1' TO 'METAL1' LAYER
+>> NODE CONVERSION FROM 'POLY2' TO 'POLY2' LAYER
+>> NODE CONVERSION FROM 'POLY' TO 'POLY' LAYER
+>> NODE CONVERSION FROM 'NSD' TO 'NSD' LAYER
+>> NODE CONVERSION FROM 'PSD' TO 'PSD' LAYER
+>> NODE CONVERSION FROM 'NWELL' TO 'NWELL' LAYER
+>> NODE CONVERSION FROM 'PSUB' TO 'PSUB' LAYER
+>> NODE CONVERSION FROM '0NPCONT' TO '0NPCONT' LAYER
+>> NODE CONVERSION FROM '0PPCONT' TO '0PPCONT' LAYER
+>> NODE CONVERSION FROM '0CONTACT' TO '0CONTACT' LAYER
+>> NODE CONVERSION FROM '1CONTACT' TO '1CONTACT' LAYER
+>> NODE CONVERSION FROM '2CONTACT' TO '2CONTACT' LAYER
+>> NODE CONVERSION FROM '3CONTACT' TO '3CONTACT' LAYER
+>> NODE CONVERSION FROM '0VIA' TO '0VIA' LAYER
+>> NODE CONVERSION FROM '0VIA2' TO '0VIA2' LAYER
+>> NODE CONVERSION FROM '0VIA3' TO '0VIA3' LAYER
+
+**************************************************************
+                      POST ATTACH
+**************************************************************
+>> GENERATE 9PAD.TXT FILE
+
+**************************************************************
+                      VIRTUAL WIRING
+**************************************************************
+
+**************************************************************
+                      SCONNECT
+**************************************************************
+
+SCONNECT 'NWELL' BY '0NPCONT' ...
+
+
+SCONNECT 'PSUB' BY '0PPCONT' ...
+
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'NWELL' BOUNDARY EDGES FROM 'NWELL' ...
+   '36' TO '72' EDGES
+
+  * WIDTH CHECK - 'NWELL'
+    SPACING : LESS THAN '2.400'
+    OPTION(s) : 
+    OUTPUT - '8NWELL'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+
+  * EXTERNAL CHECK - 'NWELL'
+    SPACING : LESS THAN '3.600'
+    OPTION(s) : N
+    OUTPUT - '8NWELL'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+
+  * EXTERNAL CHECK - 'NWELL'
+    SPACING : LESS THAN '1.200'
+    OPTION(s) : N'
+    OUTPUT - '8NWELL'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'ACTIVE' BOUNDARY EDGES FROM 'ACTIVE' ...
+   '214' TO '428' EDGES
+
+  * WIDTH CHECK - 'ACTIVE'
+    SPACING : LESS THAN '0.600'
+    OPTION(s) : 
+    OUTPUT - '8ACTIVE'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+
+  * EXTERNAL CHECK - 'ACTIVE'
+    SPACING : LESS THAN '0.600'
+    OPTION(s) : 
+    OUTPUT - '8ACTIVE'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'PACTIVE' BOUNDARY EDGES FROM 'PACTIVE' ...
+   '114' TO '228' EDGES
+>> GENERATE '6PACTIVE' AND '6NWELL' EDGES FROM 'PACTIVE' AND 'NWELL' ...
+
+  * ENCLOSE CHECK - '6PACTIVE' AND '6NWELL'
+    SPACING : LESS THAN '1.200'
+    OPTION(s) : 
+    OUTPUT - '8PACTIVE' AND '8NWELL'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'NACTIVE' BOUNDARY EDGES FROM 'NACTIVE' ...
+   '100' TO '200' EDGES
+>> GENERATE '6NACTIVE' AND '6NWELL' EDGES FROM 'NACTIVE' AND 'NWELL' ...
+
+  * EXTERNAL CHECK - '6NACTIVE' AND '6NWELL'
+    SPACING : LESS THAN '1.200'
+    OPTION(s) : 
+    OUTPUT - '8NACTIVE' AND '8NWELL'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'NPLUG' BOUNDARY EDGES FROM 'NPLUG' ...
+   '50' TO '100' EDGES
+>> GENERATE '6NPLUG' AND '6NWELL' EDGES FROM 'NPLUG' AND 'NWELL' ...
+
+  * ENCLOSE CHECK - '6NPLUG' AND '6NWELL'
+    SPACING : LESS THAN '0.600'
+    OPTION(s) : 
+    OUTPUT - '8NPLUG' AND '8NWELL'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'PPLUG' BOUNDARY EDGES FROM 'PPLUG' ...
+   '64' TO '128' EDGES
+>> GENERATE '6PPLUG' AND '6NWELL' EDGES FROM 'PPLUG' AND 'NWELL' ...
+
+  * EXTERNAL CHECK - '6PPLUG' AND '6NWELL'
+    SPACING : LESS THAN '0.600'
+    OPTION(s) : 
+    OUTPUT - '8PPLUG' AND '8NWELL'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      BOOLEAN OPERATION
+**************************************************************
+>> GENERATE 'NPACT' FROM 'NACTIVE' AND 'PACTIVE' ...
+   '100' AND '114' TO '0' EDGES
+
+**************************************************************
+                      PROCESS ERROR COMMANDS
+**************************************************************
+>> GENERATE '6TEMP' FROM 'NPACT' ...
+   '0' TO '0' EDGES
+
+**************************************************************
+                      SELECT
+**************************************************************
+>> GENERATE 'OVERPACT' FROM 'PACTIVE' (WHICH ARE OVERLAP 'NACTIVE') ...
+   '114' AND '100' TO '0' EDGES
+>> GENERATE 'OVERNACT' FROM 'NACTIVE' (WHICH ARE OVERLAP 'PACTIVE') ...
+   '100' AND '114' TO '0' EDGES
+
+**************************************************************
+                      BOOLEAN OPERATION
+**************************************************************
+>> GENERATE 'NOTOVERPACT' FROM 'PACTIVE' NOT 'OVERPACT' ...
+   '114' AND '0' TO '114' EDGES
+>> GENERATE 'NOTOVERNACT' FROM 'NACTIVE' NOT 'OVERNACT' ...
+   '100' AND '0' TO '100' EDGES
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'NOTOVERNACT' BOUNDARY EDGES FROM 'NOTOVERNACT' ...
+   '100' TO '200' EDGES
+>> GENERATE 'NOTOVERPACT' BOUNDARY EDGES FROM 'NOTOVERPACT' ...
+   '114' TO '228' EDGES
+>> GENERATE '6NOTOVERNACT' AND '6NOTOVERPACT' EDGES FROM 'NOTOVERNACT' AND 'NOTOVERPACT' ...
+
+  * EXTERNAL CHECK - '6NOTOVERNACT' AND '6NOTOVERPACT'
+    SPACING : LESS THAN '0.800'
+    OPTION(s) : 
+    OUTPUT - '8NOTOVERNACT' AND '8NOTOVERPACT'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'THK_ACTIVE' BOUNDARY EDGES FROM 'THK_ACTIVE' ...
+   '0' TO '0' EDGES
+
+  * WIDTH CHECK - 'THK_ACTIVE'
+    SPACING : LESS THAN '0.800'
+    OPTION(s) : 
+    OUTPUT - '8THK_ACTIVE'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+
+  * EXTERNAL CHECK - 'THK_ACTIVE'
+    SPACING : LESS THAN '0.800'
+    OPTION(s) : 
+    OUTPUT - '8THK_ACTIVE'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE '6ACTIVE' AND '6THK_ACTIVE' EDGES FROM 'ACTIVE' AND 'THK_ACTIVE' ...
+
+  * ENCLOSE CHECK - '6ACTIVE' AND '6THK_ACTIVE'
+    SPACING : LESS THAN '0.800'
+    OPTION(s) : 
+    OUTPUT - '8ACTIVE' AND '8THK_ACTIVE'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      SELECT
+**************************************************************
+>> GENERATE 'ENCTHK' FROM 'THK_ACTIVE' (WHICH ARE ENCLOSE 'ACTIVE') ...
+   '0' AND '214' TO '0' EDGES
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE '6THK_ACTIVE' AND '6ACTIVE' EDGES FROM 'THK_ACTIVE' AND 'ACTIVE' ...
+
+  * EXTERNAL CHECK - '6THK_ACTIVE' AND '6ACTIVE'
+    SPACING : LESS THAN '0.800'
+    OPTION(s) : 
+    OUTPUT - '8THK_ACTIVE' AND '8ACTIVE'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      BOOLEAN OPERATION
+**************************************************************
+>> GENERATE 'THKACT' FROM 'THK_ACTIVE' AND 'ACTIVE' ...
+   '0' AND '214' TO '0' EDGES
+>> GENERATE 'THKGATE' FROM 'THKACT' AND 'POLY' ...
+   '0' AND '108' TO '0' EDGES
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'THKGATE' BOUNDARY EDGES FROM 'THKGATE' ...
+   '0' TO '0' EDGES
+
+  * WIDTH CHECK - 'THKGATE'
+    SPACING : LESS THAN '0.600'
+    OPTION(s) : 
+    OUTPUT - '8THKGATE'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      BOOLEAN OPERATION
+**************************************************************
+>> GENERATE 'NONTHK' FROM 'THK_ACTIVE' NOT 'ENCTHK' ...
+   '0' AND '0' TO '0' EDGES
+
+**************************************************************
+                      PROCESS ERROR COMMANDS
+**************************************************************
+>> GENERATE '6TEMP' FROM 'NONTHK' ...
+   '0' TO '0' EDGES
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'POLY' BOUNDARY EDGES FROM 'POLY' ...
+   '108' TO '216' EDGES
+
+  * WIDTH CHECK - 'POLY'
+    SPACING : LESS THAN '0.400'
+    OPTION(s) : 
+    OUTPUT - '8POLY'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+
+  * EXTERNAL CHECK - 'POLY'
+    SPACING : LESS THAN '0.600'
+    OPTION(s) : 
+    OUTPUT - '8POLY'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      SELECT
+**************************************************************
+>> GENERATE 'POLYACT' FROM 'POLY' (WHICH ARE CUT 'ACTIVE') ...
+   '108' AND '214' TO '108' EDGES
+
+**************************************************************
+                      BOOLEAN OPERATION
+**************************************************************
+>> GENERATE 'ACTPACT' FROM 'ACTIVE' AND 'POLYACT' ...
+   '214' AND '108' TO '108' EDGES
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'ACTPACT' BOUNDARY EDGES FROM 'ACTPACT' ...
+   '108' TO '216' EDGES
+>> GENERATE '6ACTPACT' AND '6ACTIVE' EDGES FROM 'ACTPACT' AND 'ACTIVE' ...
+
+  * ENCLOSE CHECK - '6ACTPACT' AND '6ACTIVE'
+    SPACING : LESS THAN '0.000'
+    OPTION(s) : T
+    OUTPUT - '8ACTPACT' AND '8ACTIVE'
+ 
+>> NUMBER OF ERROR(S) : 0
+>> GENERATE 'POLYACT' BOUNDARY EDGES FROM 'POLYACT' ...
+   '108' TO '216' EDGES
+>> GENERATE '8ACTPACT' AND '6POLYACT' EDGES FROM '8ACTPACT' AND 'POLYACT' ...
+
+  * ENCLOSE CHECK - '8ACTPACT' AND '6POLYACT'
+    SPACING : LESS THAN '0.400'
+    OPTION(s) : T
+    OUTPUT - '8ACTPACT' AND '8POLYACT'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      SELECT
+**************************************************************
+>> GENERATE 'ACTPOLY' FROM 'ACTIVE' (WHICH ARE CUT 'POLY') ...
+   '214' AND '108' TO '100' EDGES
+
+**************************************************************
+                      BOOLEAN OPERATION
+**************************************************************
+>> GENERATE 'POLYAPOLY' FROM 'POLY' AND 'ACTPOLY' ...
+   '108' AND '100' TO '108' EDGES
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'POLYAPOLY' BOUNDARY EDGES FROM 'POLYAPOLY' ...
+   '108' TO '216' EDGES
+>> GENERATE '6POLYAPOLY' AND '6POLY' EDGES FROM 'POLYAPOLY' AND 'POLY' ...
+
+  * ENCLOSE CHECK - '6POLYAPOLY' AND '6POLY'
+    SPACING : LESS THAN '0.000'
+    OPTION(s) : T
+    OUTPUT - '8POLYAPOLY' AND '8POLY'
+ 
+>> NUMBER OF ERROR(S) : 0
+>> GENERATE 'ACTPOLY' BOUNDARY EDGES FROM 'ACTPOLY' ...
+   '100' TO '200' EDGES
+>> GENERATE '8POLYAPOLY' AND '6ACTPOLY' EDGES FROM '8POLYAPOLY' AND 'ACTPOLY' ...
+
+  * ENCLOSE CHECK - '8POLYAPOLY' AND '6ACTPOLY'
+    SPACING : LESS THAN '0.600'
+    OPTION(s) : T
+    OUTPUT - '8POLYAPOLY' AND '8ACTPOLY'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      BOOLEAN OPERATION
+**************************************************************
+>> GENERATE 'POLACT' FROM 'POLY' OR 'ACTIVE' ...
+   '108' AND '214' TO '430' EDGES
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'POLACT' BOUNDARY EDGES FROM 'POLACT' ...
+   '430' TO '860' EDGES
+
+  * EXTERNAL CHECK - 'POLACT'
+    SPACING : LESS THAN '0.200'
+    OPTION(s) : H
+    OUTPUT - '8POLACT'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'POLY2' BOUNDARY EDGES FROM 'POLY2' ...
+   '0' TO '0' EDGES
+
+  * WIDTH CHECK - 'POLY2'
+    SPACING : LESS THAN '1.400'
+    OPTION(s) : 
+    OUTPUT - '8POLY2'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+
+  * EXTERNAL CHECK - 'POLY2'
+    SPACING : LESS THAN '0.600'
+    OPTION(s) : 
+    OUTPUT - '8POLY2'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE '6POLY2' AND '6POLY' EDGES FROM 'POLY2' AND 'POLY' ...
+
+  * ENCLOSE CHECK - '6POLY2' AND '6POLY'
+    SPACING : LESS THAN '1.000'
+    OPTION(s) : 
+    OUTPUT - '8POLY2' AND '8POLY'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE '6POLY2' AND '6NWELL' EDGES FROM 'POLY2' AND 'NWELL' ...
+
+  * EXTERNAL CHECK - '6POLY2' AND '6NWELL'
+    SPACING : LESS THAN '0.400'
+    OPTION(s) : 
+    OUTPUT - '8POLY2' AND '8NWELL'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE '6POLY2' AND '6ACTIVE' EDGES FROM 'POLY2' AND 'ACTIVE' ...
+
+  * EXTERNAL CHECK - '6POLY2' AND '6ACTIVE'
+    SPACING : LESS THAN '0.400'
+    OPTION(s) : 
+    OUTPUT - '8POLY2' AND '8ACTIVE'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'CONTACT' BOUNDARY EDGES FROM 'CONTACT' ...
+   '570' TO '1140' EDGES
+>> GENERATE '6POLY2' AND '6CONTACT' EDGES FROM 'POLY2' AND 'CONTACT' ...
+
+  * EXTERNAL CHECK - '6POLY2' AND '6CONTACT'
+    SPACING : LESS THAN '1.200'
+    OPTION(s) : 
+    OUTPUT - '8POLY2' AND '8CONTACT'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      SELECT
+**************************************************************
+>> GENERATE 'NOTMET1P2' FROM 'METAL1' (WHICH ARE COMPLEMENTED CUT 'POLY2') ...
+   '342' AND '0' TO '0' EDGES
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'NOTMET1P2' BOUNDARY EDGES FROM 'NOTMET1P2' ...
+   '0' TO '0' EDGES
+>> GENERATE '6POLY2' AND '6NOTMET1P2' EDGES FROM 'POLY2' AND 'NOTMET1P2' ...
+
+  * EXTERNAL CHECK - '6POLY2' AND '6NOTMET1P2'
+    SPACING : LESS THAN '0.400'
+    OPTION(s) : 
+    OUTPUT - '8POLY2' AND '8NOTMET1P2'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE '6ACTIVE' AND '6POLY' EDGES FROM 'ACTIVE' AND 'POLY' ...
+
+  * ENCLOSE CHECK - '6ACTIVE' AND '6POLY'
+    SPACING : LESS THAN '0.000'
+    OPTION(s) : O
+    OUTPUT - '8ACTIVE' AND '8POLY'
+ 
+>> NUMBER OF ERROR(S) : 0
+>> GENERATE 'ALLSELECT' BOUNDARY EDGES FROM 'ALLSELECT' ...
+   '100' TO '200' EDGES
+>> GENERATE '6ALLSELECT' AND '8POLY' EDGES FROM 'ALLSELECT' AND '8POLY' ...
+
+  * EXTERNAL CHECK - '6ALLSELECT' AND '8POLY'
+    SPACING : LESS THAN '0.600'
+    OPTION(s) : 
+    OUTPUT - '8ALLSELECT' AND '8POLY'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'PPLUS' BOUNDARY EDGES FROM 'PPLUS' ...
+   '100' TO '200' EDGES
+>> GENERATE '6ACTIVE' AND '6PPLUS' EDGES FROM 'ACTIVE' AND 'PPLUS' ...
+
+  * ENCLOSE CHECK - '6ACTIVE' AND '6PPLUS'
+    SPACING : LESS THAN '0.400'
+    OPTION(s) : 
+    OUTPUT - '8ACTIVE' AND '8PPLUS'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'NPLUS' BOUNDARY EDGES FROM 'NPLUS' ...
+   '100' TO '200' EDGES
+>> GENERATE '6ACTIVE' AND '6NPLUS' EDGES FROM 'ACTIVE' AND 'NPLUS' ...
+
+  * ENCLOSE CHECK - '6ACTIVE' AND '6NPLUS'
+    SPACING : LESS THAN '0.400'
+    OPTION(s) : 
+    OUTPUT - '8ACTIVE' AND '8NPLUS'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE '6CONTACT' AND '6PPLUS' EDGES FROM 'CONTACT' AND 'PPLUS' ...
+
+  * ENCLOSE CHECK - '6CONTACT' AND '6PPLUS'
+    SPACING : LESS THAN '0.200'
+    OPTION(s) : 
+    OUTPUT - '8CONTACT' AND '8PPLUS'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE '6CONTACT' AND '6NPLUS' EDGES FROM 'CONTACT' AND 'NPLUS' ...
+
+  * ENCLOSE CHECK - '6CONTACT' AND '6NPLUS'
+    SPACING : LESS THAN '0.200'
+    OPTION(s) : 
+    OUTPUT - '8CONTACT' AND '8NPLUS'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+
+  * WIDTH CHECK - 'PPLUS'
+    SPACING : LESS THAN '0.400'
+    OPTION(s) : 
+    OUTPUT - '8PPLUS'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+
+  * WIDTH CHECK - 'NPLUS'
+    SPACING : LESS THAN '0.400'
+    OPTION(s) : 
+    OUTPUT - '8NPLUS'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+
+  * EXTERNAL CHECK - 'PPLUS'
+    SPACING : LESS THAN '0.400'
+    OPTION(s) : 
+    OUTPUT - '8PPLUS'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+
+  * EXTERNAL CHECK - 'NPLUS'
+    SPACING : LESS THAN '0.400'
+    OPTION(s) : 
+    OUTPUT - '8NPLUS'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      BOOLEAN OPERATION
+**************************************************************
+>> GENERATE 'NPPLUS' FROM 'NPLUS' AND 'PPLUS' ...
+   '100' AND '100' TO '0' EDGES
+
+**************************************************************
+                      PROCESS ERROR COMMANDS
+**************************************************************
+>> GENERATE '6TEMP' FROM 'NPPLUS' ...
+   '0' TO '0' EDGES
+
+**************************************************************
+                      SELECT
+**************************************************************
+>> GENERATE 'OVERNPLUS' FROM 'NPLUS' (WHICH ARE OVERLAP 'PPLUS') ...
+   '100' AND '100' TO '100' EDGES
+>> GENERATE 'OVERPPLUS' FROM 'PPLUS' (WHICH ARE OVERLAP 'NPLUS') ...
+   '100' AND '100' TO '100' EDGES
+
+**************************************************************
+                      BOOLEAN OPERATION
+**************************************************************
+>> GENERATE 'NOTOVERNPLUS' FROM 'NPLUS' NOT 'OVERNPLUS' ...
+   '100' AND '100' TO '0' EDGES
+>> GENERATE 'NOTOVERPPLUS' FROM 'PPLUS' NOT 'OVERPPLUS' ...
+   '100' AND '100' TO '0' EDGES
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'NOTOVERNPLUS' BOUNDARY EDGES FROM 'NOTOVERNPLUS' ...
+   '0' TO '0' EDGES
+>> GENERATE 'NOTOVERPPLUS' BOUNDARY EDGES FROM 'NOTOVERPPLUS' ...
+   '0' TO '0' EDGES
+>> GENERATE '6NOTOVERNPLUS' AND '6NOTOVERPPLUS' EDGES FROM 'NOTOVERNPLUS' AND 'NOTOVERPPLUS' ...
+
+  * EXTERNAL CHECK - '6NOTOVERNPLUS' AND '6NOTOVERPPLUS'
+    SPACING : LESS THAN '0.400'
+    OPTION(s) : 
+    OUTPUT - '8NOTOVERNPLUS' AND '8NOTOVERPPLUS'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+
+  * LENGTH CHECK - 'CONTACT'
+    LENGTH : NOT EQUAL TO '0.400'
+   '1140' TO '0' EDGES
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      AREA
+**************************************************************
+>> GENERATE '6TEMP' FROM 'CONTACT' ...
+>> GENERATE '6TEMP' FROM 'CONTACT' WHOSE AREAS HAVE NOT EQUAL TO '0.16 ...
+   '570' TO '0' EDGES
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE '6CONTACT' AND '6POLY' EDGES FROM 'CONTACT' AND 'POLY' ...
+
+  * ENCLOSE CHECK - '6CONTACT' AND '6POLY'
+    SPACING : LESS THAN '0.300'
+    OPTION(s) : 
+    OUTPUT - '8CONTACT' AND '8POLY'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+
+  * EXTERNAL CHECK - 'CONTACT'
+    SPACING : LESS THAN '0.600'
+    OPTION(s) : 
+    OUTPUT - '8CONTACT'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'PGATE' BOUNDARY EDGES FROM 'PGATE' ...
+   '54' TO '108' EDGES
+>> GENERATE '6CONTACT' AND '6PGATE' EDGES FROM 'CONTACT' AND 'PGATE' ...
+
+  * EXTERNAL CHECK - '6CONTACT' AND '6PGATE'
+    SPACING : LESS THAN '0.400'
+    OPTION(s) : 
+    OUTPUT - '8CONTACT' AND '8PGATE'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'NGATE' BOUNDARY EDGES FROM 'NGATE' ...
+   '54' TO '108' EDGES
+>> GENERATE '6CONTACT' AND '6NGATE' EDGES FROM 'CONTACT' AND 'NGATE' ...
+
+  * EXTERNAL CHECK - '6CONTACT' AND '6NGATE'
+    SPACING : LESS THAN '0.400'
+    OPTION(s) : 
+    OUTPUT - '8CONTACT' AND '8NGATE'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE '6CONTACT' AND '6ACTIVE' EDGES FROM 'CONTACT' AND 'ACTIVE' ...
+
+  * ENCLOSE CHECK - '6CONTACT' AND '6ACTIVE'
+    SPACING : LESS THAN '0.300'
+    OPTION(s) : 
+    OUTPUT - '8CONTACT' AND '8ACTIVE'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      BOOLEAN OPERATION
+**************************************************************
+>> GENERATE 'POLY2CONT' FROM 'CONTACT' AND 'POLY2' ...
+   '570' AND '0' TO '0' EDGES
+>> GENERATE 'POLYCAP' FROM 'POLY' AND 'POLY2' ...
+   '108' AND '0' TO '0' EDGES
+>> GENERATE 'PCAPCONT' FROM 'POLY2CONT' AND 'POLYCAP' ...
+   '0' AND '0' TO '0' EDGES
+>> GENERATE 'NPCAPCONT' FROM 'POLY2CONT' NOT 'PCAPCONT' ...
+   '0' AND '0' TO '0' EDGES
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'PCAPCONT' BOUNDARY EDGES FROM 'PCAPCONT' ...
+   '0' TO '0' EDGES
+>> GENERATE '6PCAPCONT' AND '6POLY2' EDGES FROM 'PCAPCONT' AND 'POLY2' ...
+
+  * ENCLOSE CHECK - '6PCAPCONT' AND '6POLY2'
+    SPACING : LESS THAN '0.600'
+    OPTION(s) : 
+    OUTPUT - '8PCAPCONT' AND '8POLY2'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'NPCAPCONT' BOUNDARY EDGES FROM 'NPCAPCONT' ...
+   '0' TO '0' EDGES
+>> GENERATE '6NPCAPCONT' AND '6POLY2' EDGES FROM 'NPCAPCONT' AND 'POLY2' ...
+
+  * ENCLOSE CHECK - '6NPCAPCONT' AND '6POLY2'
+    SPACING : LESS THAN '0.400'
+    OPTION(s) : 
+    OUTPUT - '8NPCAPCONT' AND '8POLY2'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'POLY2CONT' BOUNDARY EDGES FROM 'POLY2CONT' ...
+   '0' TO '0' EDGES
+>> GENERATE '6POLY2CONT' AND '6POLY' EDGES FROM 'POLY2CONT' AND 'POLY' ...
+
+  * EXTERNAL CHECK - '6POLY2CONT' AND '6POLY'
+    SPACING : LESS THAN '0.600'
+    OPTION(s) : 
+    OUTPUT - '8POLY2CONT' AND '8POLY'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE '6POLY2CONT' AND '6ACTIVE' EDGES FROM 'POLY2CONT' AND 'ACTIVE' ...
+
+  * EXTERNAL CHECK - '6POLY2CONT' AND '6ACTIVE'
+    SPACING : LESS THAN '0.600'
+    OPTION(s) : 
+    OUTPUT - '8POLY2CONT' AND '8ACTIVE'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'METAL1' BOUNDARY EDGES FROM 'METAL1' ...
+   '342' TO '684' EDGES
+
+  * WIDTH CHECK - 'METAL1'
+    SPACING : LESS THAN '0.600'
+    OPTION(s) : 
+    OUTPUT - '8METAL1'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+
+  * EXTERNAL CHECK - 'METAL1'
+    SPACING : LESS THAN '0.600'
+    OPTION(s) : 
+    OUTPUT - '8METAL1'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE '6CONTACT' AND '6METAL1' EDGES FROM 'CONTACT' AND 'METAL1' ...
+
+  * ENCLOSE CHECK - '6CONTACT' AND '6METAL1'
+    SPACING : LESS THAN '0.200'
+    OPTION(s) : 
+    OUTPUT - '8CONTACT' AND '8METAL1'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'VIA' BOUNDARY EDGES FROM 'VIA' ...
+   '160' TO '320' EDGES
+
+  * LENGTH CHECK - 'VIA'
+    LENGTH : NOT EQUAL TO '0.400'
+   '320' TO '0' EDGES
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      AREA
+**************************************************************
+>> GENERATE '6TEMP' FROM 'VIA' ...
+>> GENERATE '6TEMP' FROM 'VIA' WHOSE AREAS HAVE NOT EQUAL TO '0.16 ...
+   '160' TO '0' EDGES
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+
+  * EXTERNAL CHECK - 'VIA'
+    SPACING : LESS THAN '0.600'
+    OPTION(s) : 
+    OUTPUT - '8VIA'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE '6VIA' AND '6METAL1' EDGES FROM 'VIA' AND 'METAL1' ...
+
+  * ENCLOSE CHECK - '6VIA' AND '6METAL1'
+    SPACING : LESS THAN '0.200'
+    OPTION(s) : 
+    OUTPUT - '8VIA' AND '8METAL1'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE '6VIA' AND '6CONTACT' EDGES FROM 'VIA' AND 'CONTACT' ...
+
+  * EXTERNAL CHECK - '6VIA' AND '6CONTACT'
+    SPACING : LESS THAN '0.400'
+    OPTION(s) : 
+    OUTPUT - '8VIA' AND '8CONTACT'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE '6VIA' AND '6POLY' EDGES FROM 'VIA' AND 'POLY' ...
+
+  * EXTERNAL CHECK - '6VIA' AND '6POLY'
+    SPACING : LESS THAN '0.400'
+    OPTION(s) : 
+    OUTPUT - '8VIA' AND '8POLY'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE '6VIA' AND '6ACTIVE' EDGES FROM 'VIA' AND 'ACTIVE' ...
+
+  * EXTERNAL CHECK - '6VIA' AND '6ACTIVE'
+    SPACING : LESS THAN '0.400'
+    OPTION(s) : 
+    OUTPUT - '8VIA' AND '8ACTIVE'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'METAL2' BOUNDARY EDGES FROM 'METAL2' ...
+   '137' TO '274' EDGES
+
+  * WIDTH CHECK - 'METAL2'
+    SPACING : LESS THAN '0.600'
+    OPTION(s) : 
+    OUTPUT - '8METAL2'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+
+  * EXTERNAL CHECK - 'METAL2'
+    SPACING : LESS THAN '0.600'
+    OPTION(s) : 
+    OUTPUT - '8METAL2'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE '6VIA' AND '6METAL2' EDGES FROM 'VIA' AND 'METAL2' ...
+
+  * ENCLOSE CHECK - '6VIA' AND '6METAL2'
+    SPACING : LESS THAN '0.200'
+    OPTION(s) : 
+    OUTPUT - '8VIA' AND '8METAL2'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'VIA2' BOUNDARY EDGES FROM 'VIA2' ...
+   '34' TO '68' EDGES
+
+  * LENGTH CHECK - 'VIA2'
+    LENGTH : NOT EQUAL TO '0.400'
+   '68' TO '0' EDGES
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      AREA
+**************************************************************
+>> GENERATE '6TEMP' FROM 'VIA2' ...
+>> GENERATE '6TEMP' FROM 'VIA2' WHOSE AREAS HAVE NOT EQUAL TO '0.16 ...
+   '34' TO '0' EDGES
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+
+  * EXTERNAL CHECK - 'VIA2'
+    SPACING : LESS THAN '0.600'
+    OPTION(s) : 
+    OUTPUT - '8VIA2'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE '6VIA2' AND '6METAL2' EDGES FROM 'VIA2' AND 'METAL2' ...
+
+  * ENCLOSE CHECK - '6VIA2' AND '6METAL2'
+    SPACING : LESS THAN '0.200'
+    OPTION(s) : 
+    OUTPUT - '8VIA2' AND '8METAL2'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE '6VIA2' AND '6VIA' EDGES FROM 'VIA2' AND 'VIA' ...
+
+  * EXTERNAL CHECK - '6VIA2' AND '6VIA'
+    SPACING : LESS THAN '0.400'
+    OPTION(s) : 
+    OUTPUT - '8VIA2' AND '8VIA'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'METAL3' BOUNDARY EDGES FROM 'METAL3' ...
+   '31' TO '62' EDGES
+
+  * WIDTH CHECK - 'METAL3'
+    SPACING : LESS THAN '0.600'
+    OPTION(s) : 
+    OUTPUT - '8METAL3'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+
+  * EXTERNAL CHECK - 'METAL3'
+    SPACING : LESS THAN '0.600'
+    OPTION(s) : 
+    OUTPUT - '8METAL3'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE '6VIA2' AND '6METAL3' EDGES FROM 'VIA2' AND 'METAL3' ...
+
+  * ENCLOSE CHECK - '6VIA2' AND '6METAL3'
+    SPACING : LESS THAN '0.200'
+    OPTION(s) : 
+    OUTPUT - '8VIA2' AND '8METAL3'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'VIA3' BOUNDARY EDGES FROM 'VIA3' ...
+   '0' TO '0' EDGES
+
+  * LENGTH CHECK - 'VIA3'
+    LENGTH : NOT EQUAL TO '0.400'
+   '0' TO '0' EDGES
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      AREA
+**************************************************************
+>> GENERATE '6TEMP' FROM 'VIA3' ...
+>> GENERATE '6TEMP' FROM 'VIA3' WHOSE AREAS HAVE NOT EQUAL TO '0.16 ...
+   '0' TO '0' EDGES
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+
+  * EXTERNAL CHECK - 'VIA3'
+    SPACING : LESS THAN '0.600'
+    OPTION(s) : 
+    OUTPUT - '8VIA3'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE '6VIA3' AND '6METAL3' EDGES FROM 'VIA3' AND 'METAL3' ...
+
+  * ENCLOSE CHECK - '6VIA3' AND '6METAL3'
+    SPACING : LESS THAN '0.200'
+    OPTION(s) : 
+    OUTPUT - '8VIA3' AND '8METAL3'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'METAL4' BOUNDARY EDGES FROM 'METAL4' ...
+   '0' TO '0' EDGES
+
+  * WIDTH CHECK - 'METAL4'
+    SPACING : LESS THAN '1.200'
+    OPTION(s) : 
+    OUTPUT - '8METAL4'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+
+  * EXTERNAL CHECK - 'METAL4'
+    SPACING : LESS THAN '1.200'
+    OPTION(s) : 
+    OUTPUT - '8METAL4'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE '6VIA3' AND '6METAL4' EDGES FROM 'VIA3' AND 'METAL4' ...
+
+  * ENCLOSE CHECK - '6VIA3' AND '6METAL4'
+    SPACING : LESS THAN '0.400'
+    OPTION(s) : 
+    OUTPUT - '8VIA3' AND '8METAL4'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      SELECT
+**************************************************************
+>> GENERATE 'BPAD' FROM 'GLASS' (WHICH ARE ENCLOSE 'PROBE') ...
+   '0' AND '0' TO '0' EDGES
+
+**************************************************************
+                      BOOLEAN OPERATION
+**************************************************************
+>> GENERATE 'PPAD' FROM 'GLASS' NOT 'BPAD' ...
+   '0' AND '0' TO '0' EDGES
+
+**************************************************************
+                      SELECT
+**************************************************************
+>> GENERATE 'PADMETAL' FROM 'METAL2' (WHICH ARE ENCLOSE 'GLASS') ...
+   '137' AND '0' TO '0' EDGES
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'BPAD' BOUNDARY EDGES FROM 'BPAD' ...
+   '0' TO '0' EDGES
+
+  * WIDTH CHECK - 'BPAD'
+    SPACING : LESS THAN '60.000'
+    OPTION(s) : 
+    OUTPUT - '8BPAD'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'PPAD' BOUNDARY EDGES FROM 'PPAD' ...
+   '0' TO '0' EDGES
+
+  * WIDTH CHECK - 'PPAD'
+    SPACING : LESS THAN '20.000'
+    OPTION(s) : 
+    OUTPUT - '8PPAD'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE 'GLASS' BOUNDARY EDGES FROM 'GLASS' ...
+   '0' TO '0' EDGES
+>> GENERATE 'PADMETAL' BOUNDARY EDGES FROM 'PADMETAL' ...
+   '0' TO '0' EDGES
+>> GENERATE '6GLASS' AND '6PADMETAL' EDGES FROM 'GLASS' AND 'PADMETAL' ...
+
+  * ENCLOSE CHECK - '6GLASS' AND '6PADMETAL'
+    SPACING : LESS THAN '6.000'
+    OPTION(s) : 
+    OUTPUT - '8GLASS' AND '8PADMETAL'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE '6PADMETAL' AND '6METAL2' EDGES FROM 'PADMETAL' AND 'METAL2' ...
+
+  * EXTERNAL CHECK - '6PADMETAL' AND '6METAL2'
+    SPACING : LESS THAN '30.000'
+    OPTION(s) : N
+    OUTPUT - '8PADMETAL' AND '8METAL2'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE '6PADMETAL' AND '6ACTIVE' EDGES FROM 'PADMETAL' AND 'ACTIVE' ...
+
+  * EXTERNAL CHECK - '6PADMETAL' AND '6ACTIVE'
+    SPACING : LESS THAN '15.000'
+    OPTION(s) : 
+    OUTPUT - '8PADMETAL' AND '8ACTIVE'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE '6PADMETAL' AND '6POLY' EDGES FROM 'PADMETAL' AND 'POLY' ...
+
+  * EXTERNAL CHECK - '6PADMETAL' AND '6POLY'
+    SPACING : LESS THAN '15.000'
+    OPTION(s) : 
+    OUTPUT - '8PADMETAL' AND '8POLY'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      DESIGN RULE CHECKING
+**************************************************************
+>> GENERATE '6PADMETAL' AND '6POLY2' EDGES FROM 'PADMETAL' AND 'POLY2' ...
+
+  * EXTERNAL CHECK - '6PADMETAL' AND '6POLY2'
+    SPACING : LESS THAN '15.000'
+    OPTION(s) : 
+    OUTPUT - '8PADMETAL' AND '8POLY2'
+ 
+>> NUMBER OF ERROR(S) : 0
+
+**************************************************************
+                      WRITE THE VERIFICATION GDSII FILE
+**************************************************************
+   WRITE THE 'RESULT.GDS' FILE TO RECORD THE VERIFICATION GDSII
+
+**************************************************************
+                      CLOSE THE VERIFICATION ERROR FILE
+**************************************************************
+   CLOSE THE 'DRC' FILE TO RECORD THE VERIFICATION ERRORS
+
+**************************************************************
+                      CLOSE THE VERIFICATION REPORT FILE
+**************************************************************
+   CLOSE THE 'DRC' FILE TO RECORD THE VERIFICATION REPORT
+ 
+ * TOTAL ERROR(S) : DISPLAY[  0]/OUTPUT[  0] *
+ 
+*************** EXECUTION TIME ***************
+START EXECUTION TIME : 21:33:04
+END   EXECUTION TIME : 21:34:01
+**********************************************

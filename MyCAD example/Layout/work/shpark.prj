@@ -1,0 +1,11 @@
+[CHIP]
+TECH_FILE	C:\MyCADPro\MyCAD example\Layout\Technology file\SCMOS_SCN4ME_SUBM.TEC
+[COMMON]
+CELL	inv	inv._00
+CELL	nand	nand._00
+CELL	buffer	buffer._00
+CELL	CMOS_latch	CMOS_latch._00
+CELL	latchver2	latchver2._00
+CELL	DFF	DFF._00
+CELL	DFF2	DFF2._00
+CELL	div5n6	div5n6._00

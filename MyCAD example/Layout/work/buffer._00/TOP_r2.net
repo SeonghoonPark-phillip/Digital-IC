@@ -1,0 +1,13 @@
+***************************************************************************
+**            MyChip Station MyLVS Pro 2017
+**            Copyright(c) 1992-2017 MyCAD, Inc. 
+**            MyLVS Pro Reduction Result File.
+***************************************************************************
+
+* Source = C:\MyCADPro\MyCAD example\Layout\work\buffer._00\TOP_p2.net
+
+.GLOBAL	GND IN0 OUT0 VDD 
+
+INV	I0_OUT0 IN0	0	0
+SDW	OUT0 I0_OUT0 I0_OUT0	0	0
+MT_I1_I2+MT_I1_I9	VDD	I0_OUT0	OUT0	VDD	PMOS	W=4.80U L=400.00N	0	0

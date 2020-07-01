@@ -1,0 +1,55 @@
+DFF
+*******************************************************************************
+**            MyChip Station LayNet Pro 2017 
+**            Copyright(c) 1992-2017 MyCAD, Inc. 
+**            TIME = 01:43:39  DATE = 06/01/20 
+*******************************************************************************
+*'DFF' LAYOUT CELL
+*.GLOBAL GND:G GND:G D GND:G GND:G
+*.GLOBAL CLK QB GND:G VDD:P Q
+M1             4     CLK     VDD     VDD       PMOS W=2.4U L=0.4U AS=2.64P PS=4.6U AD=2.64P PD=4.6U
+M2             9       4      14       9       PMOS W=2.4U L=0.4U AS=3.14P PS=6.6U AD=2.64P PD=4.6U
+M3           VDD      14      15     VDD       PMOS W=2.4U L=0.4U AS=2.64P PS=4.6U AD=2.64P PD=4.6U
+M4             9      15     VDD     VDD       PMOS W=2.4U L=0.4U AS=3.14P PS=6.6U AD=2.64P PD=4.6U
+M5             Q     CLK      16       Q       PMOS W=2.4U L=0.4U AS=2.64P PS=4.6U AD=2.64P PD=4.6U
+M6            QB      16     VDD     VDD       PMOS W=2.4U L=0.4U AS=2.64P PS=4.6U AD=2.64P PD=4.6U
+M7           VDD      QB       Q     VDD       PMOS W=2.4U L=0.4U AS=2.64P PS=4.6U AD=2.64P PD=4.6U
+*---------------------------------------------------
+*	# OF MOSEF PMOS       : 7
+*---------------------------------------------------
+*
+M8           GND     CLK       4     GND       NMOS W=1.2U L=0.4U AS=1.32P PS=3.4U AD=1.32P PD=3.4U
+M9             D       4      14     GND       NMOS W=1.2U L=0.4U AS=1.32P PS=3.4U AD=1.32P PD=3.4U
+M10          GND      14      15     GND       NMOS W=1.2U L=0.4U AS=1.32P PS=3.4U AD=1.32P PD=3.4U
+M11          GND      15       9     GND       NMOS W=1.2U L=0.4U AS=1.32P PS=3.4U AD=2.62P PD=7U
+M12            9     CLK      16     GND       NMOS W=1.2U L=0.4U AS=2.62P PS=7U AD=1.32P PD=3.4U
+M13           QB      16     GND     GND       NMOS W=1.2U L=0.4U AS=1.32P PS=3.4U AD=1.32P PD=3.4U
+M14          GND      QB       Q     GND       NMOS W=1.2U L=0.4U AS=1.32P PS=3.4U AD=3.92P PD=10.6U
+*---------------------------------------------------
+*	# OF MOSEF NMOS       : 7
+*---------------------------------------------------
+*
+C1           VDD     CLK 7.14e-005P $[C]
+C2           CLK       4 7.96e-005P $[C]
+C3           CLK      14 7.96e-005P $[C]
+C4           CLK      15 9.6e-005P $[C]
+C5             9     CLK 9.6e-005P $[C]
+*---------------------------------------------------
+*	# OF CAPACITOR C          : 5
+*---------------------------------------------------
+*
+C6             4     CLK 0.00016752P $[C]
+C7            16     GND 0.0001932P $[C]
+C8            14       4 0.00034864P $[C]
+C9            14     CLK 0.00042416P $[C]
+C10           15     CLK 0.00033504P $[C]
+C11            D     CLK 0.00016752P $[C]
+C12           16     CLK 0.00019456P $[C]
+C13           16       9 0.00041812P $[C]
+C14          GND     CLK 0.00014048P $[C]
+C15            9     CLK 0.00036208P $[C]
+C16           14     GND 0.0001932P $[C]
+*---------------------------------------------------
+*	# OF CAPACITOR C          : 11
+*---------------------------------------------------
+*

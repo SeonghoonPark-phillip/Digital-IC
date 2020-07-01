@@ -1,0 +1,207 @@
+
+                 *********************************************
+                 *                                           *
+                 *               M y S p i c e               *
+                 *                                           *
+                 *         Professional Version 5.5         *
+                 *                                           *
+                 *********************************************
+
+	Date: Sat Jun 13 18:08:35 2020
+	Circuit File: C:\MyCADPro\MyCAD example\Schematic\output\sim_div5n6.cir
+	Analysis: Transient
+
+**************************  Circuit Description  **************************
+
+     1:  **********************************************************
+     2:  *      MyAnalog V6.3 SPICE netlist generator
+     3:  *      Cell Name :: sim_div5n6
+     4:  *      Flatten Extraction for Berkely SPICE 3
+     5:  *      Generated Date :: 2020/6/3 22:48.30
+     6:  **********************************************************
+     7:  *.GLOBAL CLK Q SEL
+     8:  *.GLOBAL GND VDD
+     9:  **********************************************************
+    10:  CT_I5 Q GND 500F
+    11:  VT_I2 CLK GND PULSE ( 0 5 10N 0.1N 0.1N 0.4N 1N )
+    12:  VT_I17 SEL GND PULSE ( 0 5 5N 10N 10N 40N 100N )
+    13:  MT_I0_I8 T_I0_I9_PNS SEL T_I0_I3_QB GND NMOS L=0.4U W=1.2U AD=1.32P AS=1.32P PD=3.4U PS=3.4U
+    14:  MT_I0_I9 T_I0_I9_PND SEL T_I0_I9_PNS T_I0_I9_PND PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    15:  MT_I0_I1_I0 T_I0_I9_PND T_I0_I3_Q T_I0_I1_I1_NND GND NMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    16:  MT_I0_I1_I1 T_I0_I1_I1_NND T_I0_I0_Q GND GND NMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    17:  MT_I0_I1_I2 VDD T_I0_I0_Q T_I0_I9_PND VDD PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    18:  MT_I0_I1_I9 VDD T_I0_I3_Q T_I0_I9_PND VDD PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    19:  MT_I0_I0_I6_I1 VDD T_I0_I0_I6_I4_NNG T_I0_I0_I6_QB VDD PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    20:  MT_I0_I0_I6_I2 VDD T_I0_I0_I6_QB T_I0_I0_I6_Q VDD PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    21:  MT_I0_I0_I6_I3 T_I0_I0_I6_I4_NNG T_I0_I0_I0_OUT0 T_I0_I2_Q GND NMOS L=0.4U W=1.2U AD=1.32P AS=1.32P PD=3.4U PS=3.4U
+    22:  MT_I0_I0_I6_I5 T_I0_I0_I6_Q T_I0_I0_I6_QB GND GND NMOS L=0.4U W=1.2U AD=1.32P AS=1.32P PD=3.4U PS=3.4U
+    23:  MT_I0_I0_I6_I4 T_I0_I0_I6_QB T_I0_I0_I6_I4_NNG GND GND NMOS L=0.4U W=1.2U AD=1.32P AS=1.32P PD=3.4U PS=3.4U
+    24:  MT_I0_I0_I6_I0 T_I0_I0_I6_I4_NNG T_I0_I0_I0_OUT0 T_I0_I0_I6_Q T_I0_I0_I6_Q PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    25:  MT_I0_I0_I7_I1 VDD T_I0_I0_I7_I4_NNG T_I0_I0_QB VDD PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    26:  MT_I0_I0_I7_I2 VDD T_I0_I0_QB T_I0_I0_Q VDD PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    27:  MT_I0_I0_I7_I3 T_I0_I0_I7_I4_NNG CLK T_I0_I0_I6_Q GND NMOS L=0.4U W=1.2U AD=1.32P AS=1.32P PD=3.4U PS=3.4U
+    28:  MT_I0_I0_I7_I5 T_I0_I0_Q T_I0_I0_QB GND GND NMOS L=0.4U W=1.2U AD=1.32P AS=1.32P PD=3.4U PS=3.4U
+    29:  MT_I0_I0_I7_I4 T_I0_I0_QB T_I0_I0_I7_I4_NNG GND GND NMOS L=0.4U W=1.2U AD=1.32P AS=1.32P PD=3.4U PS=3.4U
+    30:  MT_I0_I0_I7_I0 T_I0_I0_I7_I4_NNG CLK T_I0_I0_Q T_I0_I0_Q PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    31:  MT_I0_I0_I0_I0 T_I0_I0_I0_OUT0 CLK GND GND NMOS L=0.4U W=1.2U AD=1.32P AS=1.32P PD=3.4U PS=3.4U
+    32:  MT_I0_I0_I0_I2 VDD CLK T_I0_I0_I0_OUT0 VDD PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    33:  MT_I0_I2_I6_I1 VDD T_I0_I2_I6_I4_NNG T_I0_I2_I6_QB VDD PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    34:  MT_I0_I2_I6_I2 VDD T_I0_I2_I6_QB T_I0_I2_I6_Q VDD PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    35:  MT_I0_I2_I6_I3 T_I0_I2_I6_I4_NNG T_I0_I2_I0_OUT0 T_I0_I9_PNS GND NMOS L=0.4U W=1.2U AD=1.32P AS=1.32P PD=3.4U PS=3.4U
+    36:  MT_I0_I2_I6_I5 T_I0_I2_I6_Q T_I0_I2_I6_QB GND GND NMOS L=0.4U W=1.2U AD=1.32P AS=1.32P PD=3.4U PS=3.4U
+    37:  MT_I0_I2_I6_I4 T_I0_I2_I6_QB T_I0_I2_I6_I4_NNG GND GND NMOS L=0.4U W=1.2U AD=1.32P AS=1.32P PD=3.4U PS=3.4U
+    38:  MT_I0_I2_I6_I0 T_I0_I2_I6_I4_NNG T_I0_I2_I0_OUT0 T_I0_I2_I6_Q T_I0_I2_I6_Q PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    39:  MT_I0_I2_I7_I1 VDD T_I0_I2_I7_I4_NNG T_I0_I2_QB VDD PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    40:  MT_I0_I2_I7_I2 VDD T_I0_I2_QB T_I0_I2_Q VDD PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    41:  MT_I0_I2_I7_I3 T_I0_I2_I7_I4_NNG CLK T_I0_I2_I6_Q GND NMOS L=0.4U W=1.2U AD=1.32P AS=1.32P PD=3.4U PS=3.4U
+    42:  MT_I0_I2_I7_I5 T_I0_I2_Q T_I0_I2_QB GND GND NMOS L=0.4U W=1.2U AD=1.32P AS=1.32P PD=3.4U PS=3.4U
+    43:  MT_I0_I2_I7_I4 T_I0_I2_QB T_I0_I2_I7_I4_NNG GND GND NMOS L=0.4U W=1.2U AD=1.32P AS=1.32P PD=3.4U PS=3.4U
+    44:  MT_I0_I2_I7_I0 T_I0_I2_I7_I4_NNG CLK T_I0_I2_Q T_I0_I2_Q PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    45:  MT_I0_I2_I0_I0 T_I0_I2_I0_OUT0 CLK GND GND NMOS L=0.4U W=1.2U AD=1.32P AS=1.32P PD=3.4U PS=3.4U
+    46:  MT_I0_I2_I0_I2 VDD CLK T_I0_I2_I0_OUT0 VDD PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    47:  MT_I0_I3_I6_I1 VDD T_I0_I3_I6_I4_NNG T_I0_I3_I6_QB VDD PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    48:  MT_I0_I3_I6_I2 VDD T_I0_I3_I6_QB T_I0_I3_I6_Q VDD PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    49:  MT_I0_I3_I6_I3 T_I0_I3_I6_I4_NNG T_I0_I3_I0_OUT0 T_I0_I0_Q GND NMOS L=0.4U W=1.2U AD=1.32P AS=1.32P PD=3.4U PS=3.4U
+    50:  MT_I0_I3_I6_I5 T_I0_I3_I6_Q T_I0_I3_I6_QB GND GND NMOS L=0.4U W=1.2U AD=1.32P AS=1.32P PD=3.4U PS=3.4U
+    51:  MT_I0_I3_I6_I4 T_I0_I3_I6_QB T_I0_I3_I6_I4_NNG GND GND NMOS L=0.4U W=1.2U AD=1.32P AS=1.32P PD=3.4U PS=3.4U
+    52:  MT_I0_I3_I6_I0 T_I0_I3_I6_I4_NNG T_I0_I3_I0_OUT0 T_I0_I3_I6_Q T_I0_I3_I6_Q PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    53:  MT_I0_I3_I7_I1 VDD T_I0_I3_I7_I4_NNG T_I0_I3_QB VDD PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    54:  MT_I0_I3_I7_I2 VDD T_I0_I3_QB T_I0_I3_Q VDD PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    55:  MT_I0_I3_I7_I3 T_I0_I3_I7_I4_NNG CLK T_I0_I3_I6_Q GND NMOS L=0.4U W=1.2U AD=1.32P AS=1.32P PD=3.4U PS=3.4U
+    56:  MT_I0_I3_I7_I5 T_I0_I3_Q T_I0_I3_QB GND GND NMOS L=0.4U W=1.2U AD=1.32P AS=1.32P PD=3.4U PS=3.4U
+    57:  MT_I0_I3_I7_I4 T_I0_I3_QB T_I0_I3_I7_I4_NNG GND GND NMOS L=0.4U W=1.2U AD=1.32P AS=1.32P PD=3.4U PS=3.4U
+    58:  MT_I0_I3_I7_I0 T_I0_I3_I7_I4_NNG CLK T_I0_I3_Q T_I0_I3_Q PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    59:  MT_I0_I3_I0_I0 T_I0_I3_I0_OUT0 CLK GND GND NMOS L=0.4U W=1.2U AD=1.32P AS=1.32P PD=3.4U PS=3.4U
+    60:  MT_I0_I3_I0_I2 VDD CLK T_I0_I3_I0_OUT0 VDD PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    61:  MT_I0_I4_I0_I0 T_I0_I4_I0_OUT0 T_I0_I3_Q GND GND NMOS L=0.4U W=1.2U AD=1.32P AS=1.32P PD=3.4U PS=3.4U
+    62:  MT_I0_I4_I0_I2 VDD T_I0_I3_Q T_I0_I4_I0_OUT0 VDD PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    63:  MT_I0_I4_I1_I0 Q T_I0_I4_I0_OUT0 T_I0_I4_I1_I1_NND GND NMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    64:  MT_I0_I4_I1_I1 T_I0_I4_I1_I1_NND T_I0_I4_I0_OUT0 GND GND NMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    65:  MT_I0_I4_I1_I2 VDD T_I0_I4_I0_OUT0 Q VDD PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    66:  MT_I0_I4_I1_I9 VDD T_I0_I4_I0_OUT0 Q VDD PMOS L=0.4U W=2.4U AD=2.64P AS=2.64P PD=4.6U PS=4.6U
+    67:  **********************************************************
+    68:  VDD VDD 0 DC 5
+    69:  VSS GND 0 DC 0
+    70:  **********************************************************
+    71:  .TRAN 1n 200n
+    72:  **********************************************************
+    73:  * TSMC 0352P4M
+    74:  * SPICE BSIM3 VERSION 3.1 PARAMETERS
+    75:  * SPICE 3f5 Level 8, Star-HSPICE Level 49, UTMOST Level 8
+    76:  .MODEL NMOS NMOS (                                 LEVEL   = 49
+    77:  +VERSION = 3.1            TNOM    = 27             TOX     = 7.6E-9
+    78:  +XJ      = 1E-7           NCH     = 2.3579E17      VTH0    = 0.5027514
+    79:  +K1      = 0.5359893      K2      = 0.0258172      K3      = 24.6606744
+    80:  +K3B     = 1.4055348      W0      = 5.355464E-6    NLX     = 2.404522E-9
+    81:  +DVT0W   = 0              DVT1W   = 0              DVT2W   = 0
+    82:  +DVT0    = -0.120252      DVT1    = 3.084588E-3    DVT2    = 0.470688
+    83:  +U0      = 417.429294     UA      = -1.40534E-13   UB      = 1.355832E-18
+    84:  +UC      = 2.939828E-11   VSAT    = 1.208882E5     A0      = 0.9319916
+    85:  +AGS     = 0.1686015      B0      = 1.288356E-6    B1      = 5E-6
+    86:  +KETA    = 0.0105706      A1      = 0              A2      = 1
+    87:  +RDSW    = 1.103044E3     PRWG    = 1.750872E-3    PRWB    = -0.0916512
+    88:  +WR      = 1              WINT    = 6.910593E-8    LINT    = 1.993462E-8
+    89:  +XL      = -2E-8          XW      = 0              DWG     = 1.047524E-9
+    90:  +DWB     = 1.084571E-8    VOFF    = -0.0906265     NFACTOR = 0.6164962
+    91:  +CIT     = 0              CDSC    = 5.145568E-6    CDSCD   = 0
+    92:  +CDSCB   = 0              ETA0    = 4.63499E-3     ETAB    = -9.189583E-4
+    93:  +DSUB    = 0.1150044      PCLM    = 0.7703416      PDIBLC1 = 0.3438859
+    94:  +PDIBLC2 = 8.526878E-3    PDIBLCB = 0.0845601      DROUT   = 0.6859339
+    95:  +PSCBE1  = 7.23225E9      PSCBE2  = 5.005586E-10   PVAG    = 0.4108257
+    96:  +DELTA   = 0.01           MOBMOD  = 1              PRT     = 0
+    97:  +UTE     = -1.5           KT1     = -0.11          KT1L    = 0
+    98:  +KT2     = 0.022          UA1     = 4.31E-9        UB1     = -7.61E-18
+    99:  +UC1     = -5.6E-11       AT      = 3.3E4          WL      = 0
+   100:  +WLN     = 1              WW      = -1.22182E-15   WWN     = 1.1837
+   101:  +WWL     = 0              LL      = 0              LLN     = 1
+   102:  +LW      = 0              LWN     = 1              LWL     = 0
+   103:  +CAPMOD  = 2              XPART   = 0.4            CGDO    = 2.95E-10
+   104:  +CGSO    = 2.95E-10       CGBO    = 1E-11          CJ      = 1.08158E-3
+   105:  +PB      = 0.7719669      MJ      = 0.3252096      CJSW    = 3.480034E-10
+   106:  +PBSW    = 0.99           MJSW    = 0.1576976      PVTH0   = -0.0122678
+   107:  +PRDSW   = -93.3365259    PK2     = -3.470912E-3   WKETA   = -3.503848E-3
+   108:  +LKETA   = -0.0105386      )
+   109:  *
+   110:  .MODEL PMOS PMOS (                                 LEVEL   = 49
+   111:  +VERSION = 3.1            TNOM    = 27             TOX     = 7.6E-9
+   112:  +XJ      = 1E-7           NCH     = 8.52E16        VTH0    = -0.6821549
+   113:  +K1      = 0.4197546      K2      = -6.11453E-3    K3      = 35.791795
+   114:  +K3B     = -2.796173      W0      = 1.990794E-6    NLX     = 4.309814E-7
+   115:  +DVT0W   = 0              DVT1W   = 0              DVT2W   = 0
+   116:  +DVT0    = 1.134781       DVT1    = 0.3272645      DVT2    = -1.051562E-3
+   117:  +U0      = 141.3184274    UA      = 1.024889E-10   UB      = 1.354611E-18
+   118:  +UC      = -3.30244E-11   VSAT    = 1.6171E5       A0      = 0.6693235
+   119:  +AGS     = 0.2959248      B0      = 2.86196E-6     B1      = 5E-6
+   120:  +KETA    = -6.382387E-3   A1      = 0              A2      = 1
+   121:  +RDSW    = 3.44286E3      PRWG    = -0.0626736     PRWB    = 0.0981315
+   122:  +WR      = 1              WINT    = 5.340142E-8    LINT    = 1.410986E-9
+   123:  +XL      = -2E-8          XW      = 0              DWG     = -4.209302E-9
+   124:  +DWB     = 1.12145E-8     VOFF    = -0.1154702     NFACTOR = 2
+   125:  +CIT     = 0              CDSC    = 0              CDSCD   = 0
+   126:  +CDSCB   = 4.724734E-5    ETA0    = 0.0115959      ETAB    = 2.08259E-4
+   127:  +DSUB    = 0.2766226      PCLM    = 7.8965744      PDIBLC1 = 1.97648E-3
+   128:  +PDIBLC2 = 8.825766E-3    PDIBLCB = 2.37472E-3     DROUT   = 0.4321935
+   129:  +PSCBE1  = 3.010835E10    PSCBE2  = 7.998967E-10   PVAG    = 15
+   130:  +DELTA   = 0.01           MOBMOD  = 1              PRT     = 0
+   131:  +UTE     = -1.5           KT1     = -0.11          KT1L    = 0
+   132:  +KT2     = 0.022          UA1     = 4.31E-9        UB1     = -7.61E-18
+   133:  +UC1     = -5.6E-11       AT      = 3.3E4          WL      = 0
+   134:  +WLN     = 1              WW      = -5.22182E-16   WWN     = 1.195
+   135:  +WWL     = 0              LL      = 0              LLN     = 1
+   136:  +LW      = 0              LWN     = 1              LWL     = 0
+   137:  +CAPMOD  = 2              XPART   = 0.4            CGDO    = 2.77E-10
+   138:  +CGSO    = 2.77E-10       CGBO    = 1E-11          CJ      = 1.417679E-3
+   139:  +PB      = 0.99           MJ      = 0.5636812      CJSW    = 4.292884E-10
+   140:  +PBSW    = 0.99           MJSW    = 0.3497357      PVTH0   = 0.0116448
+   141:  +PRDSW   = -58.3059685    PK2     = 1.654991E-3    WKETA   = -6.310553E-4
+   142:  +LKETA   = 1.189744E-3     )
+   143:  *
+   144:  
+
+***************************  Model Parameters  ****************************
+
+
+***************  Device Parameters (Only for .op analysis)  ***************
+
+
+
+**************************  Analysis Parameters  **************************
+
+	Stepsize ............ : 1n
+	Final time .......... : 200n
+	Use Initial Conditions: Off
+
+
+
+**************  Options (Only those different from default)  **************
+
+
+
+*************************  Simulation Statistics  *************************
+
+	Total number of iterations.....................: 0
+	Number of iterations for transient analysis....: 0
+	Total number of timepoints.....................: 0
+	Number of timepoints accepted..................: 0
+	Number of timepoints rejected..................: 0
+	Total analysis time (sec)......................: 0
+	Transient analysis time (sec)..................: 0
+	Time spent in device loading (sec).............: 0
+	Time spent in L-U decomposition (sec)..........: 0
+	Time spent in matrix reordering (sec)..........: 0
+	Time spent in matrix solving (sec).............: 0
+	Time spent in transient L-U decomposition (sec): 0
+	Time spent in transient matrix solving (sec)...: 0
+
+***************************  Kernel Messages  *****************************
+
+Circuit: **********************************************************
+
+Warning: parameter xl not supported; value ignored
+Warning: parameter xw not supported; value ignored
+Warning: parameter xl not supported; value ignored
+Warning: parameter xw not supported; value ignored
+Warning: vt_i17: no DC value, transient time 0 value used
+Warning: vt_i2: no DC value, transient time 0 value used
+Simulation cancelled by user
+

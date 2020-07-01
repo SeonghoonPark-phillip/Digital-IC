@@ -1,0 +1,11 @@
+***************************************************************************
+**            MyChip Station MyLVS Pro 2017
+**            Copyright(c) 1992-2017 MyCAD, Inc. 
+**            MyLVS Pro Reduction Result File.
+***************************************************************************
+
+* Source = C:\MyCADPro\MyCAD example\Layout\work\nand2._00\TOP_p2.net
+
+.GLOBAL	GND IN0 IN1 OUT0 VDD 
+
+NAND	OUT0 IN0 IN1	0	0

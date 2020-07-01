@@ -1,0 +1,20 @@
+***************************************************************************
+**            MyChip Station MyLVS Pro 2017
+**            Copyright(c) 1992-2017 MyCAD, Inc. 
+**            MyLVS Pro Report File for Reduction Result.
+***************************************************************************
+
+*Dev1  NAND	X=0	Y=0
+OUT0 IN0, IN1
+{
+    PUP	OUT0 IN0 IN1	X=0	Y=0
+    (
+        MT_I2	VDD	IN0	OUT0	VDD	PMOS	W=2.40U L=400.00N	X=0	Y=0
+        MT_I9	VDD	IN1	OUT0	VDD	PMOS	W=2.40U L=400.00N	X=0	Y=0
+    )
+    SDW	OUT0 IN0 IN1	X=0	Y=0
+    (
+        MT_I1	I1_NND	IN0	GND	GND	NMOS	W=2.40U L=400.00N	X=0	Y=0
+        MT_I0	OUT0	IN1	I1_NND	GND	NMOS	W=2.40U L=400.00N	X=0	Y=0
+    )
+}

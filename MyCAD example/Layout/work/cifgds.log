@@ -1,0 +1,189 @@
+Reading LIBRARY 'inverter.prj'.
+[Warning] inverter.prj reference library references another libraries
+Done reading LIBRARY 'inverter.prj'.
+
+++ Read Technology (C:\MyCADPro\MyCAD example\Layout\Technology file\SCMOS_SCN4ME_SUBM.TEC).
+
+[ Cells changed name ]
+
+[ Layer Mapping (define_name gds_number data_type) ]
+                       nwell         42         0
+                      active         43         0
+                  thk_active         60         0
+                        poly         46         0
+                       nplus         45         0
+                       pplus         44         0
+                       poly2         56         0
+                     contact         25         0
+                         via         50         0
+                      metal1         49         0
+                      metal2         51         0
+                        via2         61         0
+                      metal3         62         0
+                        via3         30         0
+                      metal4         31         0
+                       glass         34         0
+                       probe         26         0
+                    res_mask         79         0
+                     polytxt         74         0
+                      me1txt         75         0
+                      me2txt         76         0
+                      me3txt         77         0
+                      me4txt         78         0
+
+++ Write Gds file (C:\MyCADPro\MyCAD example\Layout\work\nanad.gds).
+
+++ Read MyChip file (C:\MyCADPro\MyCAD example\Layout\work\nand2._00\layout.1).
+[ Cell : nand2 ]
+ . # of boundary :    51
+ . # of text     :     5
+ . # of total    :    56
+[ Cell : nand2 ]
+ . # of boundary :    51
+ . # of text     :     5
+ . # of total    :    56
+   Cell Size     :  -22.900   10.900   -9.900   28.000 [um]
+
+++ Read MyChip file (C:\MyCADPro\MyCAD example\Layout\work\inverter._00\layout.1).
+[ Cell : inverter ]
+ . # of boundary :    27
+ . # of text     :     4
+ . # of total    :    31
+[ Cell : inverter ]
+ . # of boundary :    27
+ . # of text     :     4
+ . # of total    :    31
+   Cell Size     :  -22.900   10.900  -12.400   28.000 [um]
+!! Succeed in converting the MyChip file to GDS.
+
+++ Read Technology (C:\MyCADPro\MyCAD example\Layout\Technology file\SCMOS_SCN4ME_SUBM.TEC).
+
+[ Cells changed name ]
+
+[ Layer Mapping (define_name gds_number data_type) ]
+                       nwell         42         0
+                      active         43         0
+                  thk_active         60         0
+                        poly         46         0
+                       nplus         45         0
+                       pplus         44         0
+                       poly2         56         0
+                     contact         25         0
+                         via         50         0
+                      metal1         49         0
+                      metal2         51         0
+                        via2         61         0
+                      metal3         62         0
+                        via3         30         0
+                      metal4         31         0
+                       glass         34         0
+                       probe         26         0
+                    res_mask         79         0
+                     polytxt         74         0
+                      me1txt         75         0
+                      me2txt         76         0
+                      me3txt         77         0
+                      me4txt         78         0
+
+++ Write Gds file (C:\MyCADPro\MyCAD example\Layout\work\DIV5n6.gds).
+
+++ Read MyChip file (C:\MyCADPro\MyCAD example\Layout\work\inv._00\layout.1).
+[ Cell : inv ]
+ . # of boundary :    28
+ . # of text     :     4
+ . # of total    :    32
+[ Cell : inv ]
+ . # of boundary :    28
+ . # of text     :     4
+ . # of total    :    32
+   Cell Size     :  -20.800   15.100  -13.500   27.600 [um]
+
+++ Read MyChip file (C:\MyCADPro\MyCAD example\Layout\work\nand._00\layout.1).
+[ Cell : nand ]
+ . # of boundary :    39
+ . # of text     :     5
+ . # of total    :    44
+[ Cell : nand ]
+ . # of boundary :    39
+ . # of text     :     5
+ . # of total    :    44
+   Cell Size     :  -21.500   14.400  -13.600   27.400 [um]
+
+++ Read MyChip file (C:\MyCADPro\MyCAD example\Layout\work\buffer._00\layout.1).
+[ Cell : buffer ]
+ . # of boundary :    35
+ . # of text     :     4
+ . # of sref     :     1
+ . # of total    :    40
+[ Cell : buffer ]
+ . # of boundary :    35
+ . # of text     :     4
+ . # of sref     :     1
+ . # of total    :    40
+   Cell Size     :  -21.900   -5.200  -10.000    7.800 [um]
+
+++ Read MyChip file (C:\MyCADPro\MyCAD example\Layout\work\CMOS_latch._00\layout.1).
+[ Cell : CMOS_latch ]
+ . # of boundary :    39
+ . # of text     :     9
+ . # of sref     :     2
+ . # of total    :    50
+[ Cell : CMOS_latch ]
+ . # of boundary :    39
+ . # of text     :     9
+ . # of sref     :     2
+ . # of total    :    50
+   Cell Size     :  -11.600  -10.300    7.300    5.900 [um]
+
+++ Read MyChip file (C:\MyCADPro\MyCAD example\Layout\work\latchver2._00\layout.1).
+[ Cell : latchver2 ]
+ . # of boundary :    36
+ . # of text     :     9
+ . # of sref     :     2
+ . # of total    :    47
+[ Cell : latchver2 ]
+ . # of boundary :    36
+ . # of text     :     9
+ . # of sref     :     2
+ . # of total    :    47
+   Cell Size     :  -12.500   -2.100    2.800   10.400 [um]
+
+++ Read MyChip file (C:\MyCADPro\MyCAD example\Layout\work\DFF._00\layout.1).
+[ Cell : DFF ]
+ . # of boundary :    44
+ . # of text     :    10
+ . # of sref     :     3
+ . # of total    :    57
+[ Cell : DFF ]
+ . # of boundary :    44
+ . # of text     :    10
+ . # of sref     :     3
+ . # of total    :    57
+   Cell Size     :  -26.300   -7.100   17.100   10.100 [um]
+
+++ Read MyChip file (C:\MyCADPro\MyCAD example\Layout\work\DFF2._00\layout.1).
+[ Cell : DFF2 ]
+ . # of boundary :    43
+ . # of text     :    12
+ . # of sref     :     3
+ . # of total    :    58
+[ Cell : DFF2 ]
+ . # of boundary :    43
+ . # of text     :    12
+ . # of sref     :     3
+ . # of total    :    58
+   Cell Size     :  -10.900  -25.100    9.300   12.400 [um]
+
+++ Read MyChip file (C:\MyCADPro\MyCAD example\Layout\work\div5n6._00\layout.1).
+[ Cell : div5n6 ]
+ . # of boundary :   132
+ . # of text     :    23
+ . # of sref     :     5
+ . # of total    :   160
+[ Cell : div5n6 ]
+ . # of boundary :   132
+ . # of text     :    23
+ . # of sref     :     5
+ . # of total    :   160
+   Cell Size     :  -12.700  -38.300   41.900   17.000 [um]
+!! Succeed in converting the MyChip file to GDS.

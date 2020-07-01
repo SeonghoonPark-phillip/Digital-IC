@@ -1,0 +1,18 @@
+***** THE INFORMATION FOR NODES MATCHED BETWEEN SCHEMATIC AND LAYOUT *****
+SCHMATIC NODE NAME      LAYOUT NODE NAME
+QB                      QB
+I4_NNG                  5
+Q                       Q
+D                       D
+CLK                     CLK
+GND                     GND
+
+***** THE INFORMATION FOR DEVICES MATCHED BETWEEN SCHEMATIC AND LAYOUT *****
+ Dev1 INV   QB I4_NNG
+:Dev1 INV   QB(QB) I4_NNG(5)
+ Dev2 INV   Q QB
+:Dev2 INV   Q(Q) QB(QB)
+ Dev3 MOS NMOS MT_I3 CLK, D, I4_NNG
+:Dev3 MOS NMOS MT_I3 CLK(CLK), I4_NNG(5), D(D)
+ Dev4 MOS PMOS MT_I0 CLK, Q, I4_NNG
+:Dev4 MOS PMOS MT_I0 CLK(CLK), Q(Q), I4_NNG(5)

@@ -1,0 +1,48 @@
+***************************************************************************
+**            MyChip Station MyLVS Pro 2017
+**            Copyright(c) 1992-2017 MyCAD, Inc. 
+**            MyLVS Pro Report File for Reduction Result.
+***************************************************************************
+
+*Dev1  INV	X=0	Y=0
+QB T_I7_I4_NNG
+{
+    MT_I7_I1	VDD	T_I7_I4_NNG	QB	VDD	PMOS	W=2.40U L=400.00N	X=0	Y=0
+    MT_I7_I4	QB	T_I7_I4_NNG	GND	GND	NMOS	W=1.20U L=400.00N	X=0	Y=0
+}
+*Dev2  INV	X=0	Y=0
+Q QB
+{
+    MT_I7_I2	VDD	QB	Q	VDD	PMOS	W=2.40U L=400.00N	X=0	Y=0
+    MT_I7_I5	Q	QB	GND	GND	NMOS	W=1.20U L=400.00N	X=0	Y=0
+}
+*Dev3  INV	X=0	Y=0
+I0_OUT0 CLK
+{
+    MT_I0_I2	VDD	CLK	I0_OUT0	VDD	PMOS	W=2.40U L=400.00N	X=0	Y=0
+    MT_I0_I0	I0_OUT0	CLK	GND	GND	NMOS	W=1.20U L=400.00N	X=0	Y=0
+}
+*Dev4  INV	X=0	Y=0
+I6_Q T_I6_QB
+{
+    MT_I6_I2	VDD	T_I6_QB	I6_Q	VDD	PMOS	W=2.40U L=400.00N	X=0	Y=0
+    MT_I6_I5	I6_Q	T_I6_QB	GND	GND	NMOS	W=1.20U L=400.00N	X=0	Y=0
+}
+*Dev5  INV	X=0	Y=0
+T_I6_QB T_I6_I4_NNG
+{
+    MT_I6_I1	VDD	T_I6_I4_NNG	T_I6_QB	VDD	PMOS	W=2.40U L=400.00N	X=0	Y=0
+    MT_I6_I4	T_I6_QB	T_I6_I4_NNG	GND	GND	NMOS	W=1.20U L=400.00N	X=0	Y=0
+}
+*Dev6 MOS NMOS MT_I7_I3	X=0	Y=0
+CLK, T_I7_I4_NNG, I6_Q, GND
+W=1.20U L=400.00N
+*Dev7 MOS PMOS MT_I7_I0	X=0	Y=0
+CLK, T_I7_I4_NNG, Q, Q
+W=2.40U L=400.00N
+*Dev8 MOS NMOS MT_I6_I3	X=0	Y=0
+I0_OUT0, T_I6_I4_NNG, D, GND
+W=1.20U L=400.00N
+*Dev9 MOS PMOS MT_I6_I0	X=0	Y=0
+I0_OUT0, T_I6_I4_NNG, I6_Q, I6_Q
+W=2.40U L=400.00N

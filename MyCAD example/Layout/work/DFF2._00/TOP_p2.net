@@ -1,0 +1,32 @@
+* **********************************************************
+
+**********************************************************************
+**	MyChip Station MyLVS Pro 2017
+**	Copyright(c) 1992-2017 MyCAD, Inc.
+**			
+**********************************************************************
+
+*.GLOBAL CLK D GND:G Q QB VDD:P 
+
+**********************************************************************
+**  Beginning of device list
+**********************************************************************
+
+MT_I0_I0	I0_OUT0	CLK	GND	GND	NMOS	L=4e-007	W=1.2e-006	
+MT_I0_I2	VDD	CLK	I0_OUT0	VDD	PMOS	L=4e-007	W=2.4e-006	
+MT_I6_I0	T_I6_I4_NNG	I0_OUT0	I6_Q	I6_Q	PMOS	L=4e-007	W=2.4e-006	
+MT_I6_I1	VDD	T_I6_I4_NNG	T_I6_QB	VDD	PMOS	L=4e-007	W=2.4e-006	
+MT_I6_I2	VDD	T_I6_QB	I6_Q	VDD	PMOS	L=4e-007	W=2.4e-006	
+MT_I6_I3	T_I6_I4_NNG	I0_OUT0	D	GND	NMOS	L=4e-007	W=1.2e-006	
+MT_I6_I4	T_I6_QB	T_I6_I4_NNG	GND	GND	NMOS	L=4e-007	W=1.2e-006	
+MT_I6_I5	I6_Q	T_I6_QB	GND	GND	NMOS	L=4e-007	W=1.2e-006	
+MT_I7_I0	T_I7_I4_NNG	CLK	Q	Q	PMOS	L=4e-007	W=2.4e-006	
+MT_I7_I1	VDD	T_I7_I4_NNG	QB	VDD	PMOS	L=4e-007	W=2.4e-006	
+MT_I7_I2	VDD	QB	Q	VDD	PMOS	L=4e-007	W=2.4e-006	
+MT_I7_I3	T_I7_I4_NNG	CLK	I6_Q	GND	NMOS	L=4e-007	W=1.2e-006	
+MT_I7_I4	QB	T_I7_I4_NNG	GND	GND	NMOS	L=4e-007	W=1.2e-006	
+MT_I7_I5	Q	QB	GND	GND	NMOS	L=4e-007	W=1.2e-006	
+
+**********************************************************************
+**  End of device list
+**********************************************************************

@@ -1,0 +1,111 @@
+**************************************************************** 
+**            MyChip Station MyLVS Pro 2017
+**            Copyright(c) 1992-2017 MyCAD, Inc. 
+**            EXECUTION TIME = 21:37:12  DATE = 6/4/2020 
+**************************************************************** 
+ 
+MYLVS PATH : C:\MyCADPro\MyCAD example\Layout\work\div5n6._00\
+CELL1 NAME : div5n6
+CELL2 NAME :
+LAYOUT EXTRACTION : extract.1
+SCHEMATIC NETLIST : DIV5N6.cir
+ 
+[L] CMOS REDUCE OPTION (NOR and NAND) -- OFF
+[C] CMOS REDUCE OPTION (NOR, NAND, AOI and OAI) -- ON
+[F] ALL UNUSED DEVICES WILL BE FILTERED FROM CHECKING -- OFF
+[K] ALL PARALLEL DEVICES WILL REMAIN "UNSMASHED" -- OFF
+[S] ALL THE PARALLEL MOS-SERIES WITH THE SAME I/O WILL BE SMASHED -- ON
+[X] NO SWAPPING OF INPUTS WILL BE ALLOWED -- OFF
+[U] ONLY THE UNMATCHED DEVICES ON MATCHED NODE WILL BE REPORTED -- OFF
+[R] ALL SERIES AND PARALLEL RESISTOR DEVICES WILL BE SMASHED -- OFF
+[A] ALL SERIES CAPACITORS WILL BE SMASHED -- OFF
+[P] THE CAPACITOR POLARITY WILL BE CHECKED -- OFF
+[B] BULK NODE WILL BE COMPARED -- OFF
+ 
+USE NET AND DEVICE SHAPE FILE -- NO
+ 
+CHECK MODE : FLAT
+PARSING 'extract.1' NETLIST FILE.
+WRITE 'TOP_p1.net' NETLIST FILE.
+PARSING 'DIV5N6.cir' NETLIST FILE.
+WRITE 'TOP_p2.net' NETLIST FILE.
+WRITE 'TOP_p2.net' NETLIST FILE.
+ 
+------------------------------ 1 ------------------------------
+               CELL NAME : TOP
+
+REDUCE 'TOP_p1.net' AND 'TOP_p2.net' NETLIST FILES.
+READ 'TOP_p1.net' NETLIST FILE.
+WRITE 'TOP_r1.net' REDUCTION NETLIST FILE.
+WRITE 'TOP_r1.rep' REPORT FILE.
+READ 'TOP_p2.net' NETLIST FILE.
+WRITE 'TOP_r2.net' REDUCTION NETLIST FILE.
+WRITE 'TOP_r2.rep' REPORT FILE.
+COMPARE 'TOP_r1.net' AND 'TOP_r2.net' NETLIST FILES.
+READ 'TOP_r1.net' REDUCTION NETLIST FILE.
+READ 'TOP_r2.net' REDUCTION NETLIST FILE.
+ 
+Start Iteration
+    Iteration Part1 1 
+    Iteration Part1 2 
+    Iteration Part1 3 
+    Iteration Part1 4 
+    Iteration Part1 5 
+    Iteration Part2 1 
+    Iteration Part2 2 
+    Iteration Part2 3 
+Complete Iteration
+ 
+WRITE 'DIV5n6.dis' DISCREPANCY FILE.
+ 
+*******   MYLVS DEV SUMMARY REPORT  *******
+
+*******************************************
+****  REDUCE (LAYOUT) SUMMARY REPORT   ****
+*******************************************
+---------- TOTAL LAYOUT DEVICES -----------
+MOS      : 54
+... SMASHED  MOS : 1
+---------- REDUCED LAYOUT DEVICES ---------
+MOS      : 15
+INV      : 16
+SDW      : 1
+NAND     : 1
+
+*******************************************
+***  REDUCE (SCHEMATIC) SUMMARY REPORT  ***
+*******************************************
+--------- TOTAL SCHEMATIC DEVICES ---------
+MOS      : 54
+... SMASHED  MOS : 1
+--------- REDUCED SCHEMATIC DEVICES -------
+MOS      : 15
+INV      : 16
+SDW      : 1
+NAND     : 1
+
+
+******** LVS DEVICES MATCHED SUMMARY ********
+NUMBER OF UN-MATCHED SCHEMATIC DEVICES =    0
+NUMBER OF    MATCHED SCHEMATIC DEVICES =   33
+NUMBER OF UN-MATCHED LAYOUT    DEVICES =    0
+NUMBER OF    MATCHED LAYOUT    DEVICES =   33
+
+********** LVS DISCREPANCY SUMMARY **********
+NUMBER OF    DISCREPANCIES             =    0
+
+*********************************************
+NUMBER OF UN-MATCHED SCHEMATIC DEVICES =    0
+NUMBER OF UN-MATCHED LAYOUT    DEVICES =    0
+NUMBER OF    DISCREPANCIES             =    0
+NUMBER OF UN-MATCHED AND DISCREPANCIES =    0
+*********************************************
+
+----------------------------------------------------------------
+
+
+*************** EXECUTION TIME **************
+START EXECUTION TIME : 21:37:12
+END   EXECUTION TIME : 21:37:12
+********************************************* 
+>>>>> LVS-CHECK COMPLETED <<<<<

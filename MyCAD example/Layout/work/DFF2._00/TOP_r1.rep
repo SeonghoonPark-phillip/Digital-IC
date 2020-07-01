@@ -1,0 +1,48 @@
+***************************************************************************
+**            MyChip Station MyLVS Pro 2017
+**            Copyright(c) 1992-2017 MyCAD, Inc. 
+**            MyLVS Pro Report File for Reduction Result.
+***************************************************************************
+
+*Dev1  INV	X=-1	Y=6.8
+QB 17
+{
+    M4	VDD	17	QB	VDD	PMOS	W=2.40U L=400.00N	X=-1	Y=6.8
+    M12	QB	17	GND	GND	NMOS	W=1.20U L=400.00N	X=-1	Y=2.1
+}
+*Dev2  INV	X=3	Y=6.8
+Q QB
+{
+    M5	VDD	QB	Q	VDD	PMOS	W=2.40U L=400.00N	X=3	Y=6.8
+    M13	Q	QB	GND	GND	NMOS	W=1.20U L=400.00N	X=3	Y=2.1
+}
+*Dev3  INV	X=-2.3	Y=-14.5
+16 18
+{
+    M3	VDD	18	16	VDD	PMOS	W=2.40U L=400.00N	X=-2.3	Y=-14.5
+    M10	16	18	GND	GND	NMOS	W=1.20U L=400.00N	X=-2.3	Y=-19.2
+}
+*Dev4  INV	X=2.4	Y=-3
+12 CLK
+{
+    M6	VDD	CLK	12	VDD	PMOS	W=2.40U L=400.00N	X=2.4	Y=-3
+    M11	12	CLK	GND	GND	NMOS	W=1.20U L=400.00N	X=-2.3	Y=-3
+}
+*Dev5  INV	X=-6.3	Y=-14.5
+3 16
+{
+    M2	VDD	16	3	VDD	PMOS	W=2.40U L=400.00N	X=-6.3	Y=-14.5
+    M9	3	16	GND	GND	NMOS	W=1.20U L=400.00N	X=-6.3	Y=-19.2
+}
+*Dev6 MOS NMOS M8	X=-8.6	Y=5.3
+CLK, 3, 17, GND
+W=1.20U L=400.00N
+*Dev7 MOS PMOS M7	X=5.3	Y=-21.9
+12, 3, 18, 3
+W=2.40U L=400.00N
+*Dev8 MOS NMOS M14	X=5.3	Y=-16
+12, D, 18, GND
+W=1.20U L=400.00N
+*Dev9 MOS PMOS M1	X=-8.6	Y=-0.6
+CLK, Q, 17, Q
+W=2.40U L=400.00N
